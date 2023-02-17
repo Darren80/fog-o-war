@@ -24,6 +24,14 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
+      },
+      "android": {
+        "package": "ca.brentvatne.growlerprowler",
+        "config": {
+          "googleMaps": {
+            "apiKey": "AAIzaSyCn5oa8FoytsvOYQ-sXHfwu3CdZU02VEQU"
+          }
+        }
       }
     },
     "web": {
