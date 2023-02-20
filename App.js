@@ -25,6 +25,8 @@ export default function App() {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
+  let points = [];
+
   (async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -43,6 +45,8 @@ export default function App() {
   if (errorMsg) {
     text = errorMsg;
   } else if (location) {
+    points.push([location.coords.longitude, location.coords.latitude]);
+    points.push([location.coords.longitude, location.coords.latitude]);
     text = JSON.stringify(location);
   }
 
@@ -54,16 +58,18 @@ export default function App() {
     );
   }
 
-  const line = turf.lineString([
-    [-1.6017298904997403, 53.80479853581707],
-    [-1.568058581035217, 53.81433492617265],
-    [-1.5298847127455986, 53.807341785372216],
-    [-1.5403580560971193, 53.78745408568],
-    [-1.4877955759136512, 53.798786605379604],
-    [-1.499051972973632, 53.77415181590533],
-    [-1.5750081826972746, 53.76113464536641],
-    [-1.6189570720875395, 53.7819023466522],
-  ]);
+  const line = turf.lineString(points);
+
+  if (
+    Math.abs(points[points.length - 1][0]) -
+      Math.abs(location.coords.longitude) >=
+      0.000001 ||
+    Math.abs(points[points.length - 1][1]) -
+      Math.abs(location.coords.latitude) >=
+      0.000001
+  ) {
+    points.push([location.coords.longitude, location.coords.latitude]);
+  }
 
   const radius = 50; // meters
 
@@ -83,22 +89,29 @@ export default function App() {
 
   var mask = turf.polygon([
     [
-      [0, 90],
-      [180, 90],
-      [180, -90],
-      [0, -90],
-      [-180, -90],
-      [-180, 0],
-      [-180, 90],
-      [0, 90],
+      [0, 89],
+      [179, 89],
+      [179, -89],
+      [0, -89],
+      [-179, -89],
+      [-179, 0],
+      [-179, 89],
+      [0, 89],
     ],
   ]);
   var masked = turf.mask(simplified, mask);
-
+  masked.properties = {
+    stroke: "#555555",
+    "stroke-width": 2,
+    "stroke-opacity": 1,
+    fill: "#555555",
+    "fill-opacity": 1,
+  };
   const turfCoOrds = {
     type: "FeatureCollection",
     features: [masked],
   };
+  console.log(JSON.stringify(masked));
 
   return (
     <View style={styles.container}>
