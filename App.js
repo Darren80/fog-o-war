@@ -112,6 +112,10 @@ export default function App() {
         }}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
+        showsUserLocation={true}
+        mapPadding={{
+          top: 30,
+        }}
       >
         <Geojson geojson={turfCoOrds} />
       </MapView>
