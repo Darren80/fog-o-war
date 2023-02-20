@@ -1,7 +1,7 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import { PROVIDER_GOOGLE, Polyline, Polygon } from 'react-native-maps';
-import MapView from 'react-native-maps';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
+import MapView from "react-native-maps";
 
 let worldPolygonCoordinates = [
   { latitude: 85, longitude: 90 },
@@ -15,8 +15,8 @@ let worldPolygonCoordinates = [
   { latitude: -85, longitude: 90 },
   { latitude: -85, longitude: 179.9 },
   { latitude: 0, longitude: 179.9 },
-  { latitude: 85, longitude: 179.9 }
-]
+  { latitude: 85, longitude: 179.9 },
+];
 
 export default function App() {
   return (
@@ -29,22 +29,9 @@ export default function App() {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-        provider={PROVIDER_GOOGLE} style={styles.map} >
-        <Polygon
-          fillColor="rgba(255,0,0,0.4)"
-          coordinates={worldPolygonCoordinates}
-          // holes={[
-          //   [
-          //     {latitude: 54.560609, longitude: 10.153528},
-          //     {latitude: 60.565251, longitude: 10.185822},
-          //     {latitude: 40.552871, longitude: -20.172480},
-          //     {latitude: 40.552871, longitude: -10.172480}
-          //   ]
-          // ]}
-          strokeColor="#000" // fallback for when `strokeColors` is not supported by the map-provider
-          strokeWidth={6}
-        />
-      </MapView>
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+      ></MapView>
       <StatusBar style="auto" />
     </View>
   );
@@ -53,12 +40,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   map: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
 });
