@@ -20,6 +20,38 @@ let worldPolygonCoordinates = [
 ];
 
 export default function App() {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  (async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      setErrorMsg("Permission to access location was denied");
+      return;
+    }
+
+    let newLocation = await Location.getCurrentPositionAsync({
+      enableHighAccuracy: true,
+    });
+    setLocation(newLocation);
+  })();
+
+  let text = "Waiting..";
+  if (errorMsg) {
+    text = errorMsg;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
+
+  if (!location) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.paragraph}>Loading location {location}</Text>
+      </View>
+    );
+  }
+
   const line = turf.lineString([
     [-1.6017298904997403, 53.80479853581707],
     [-1.568058581035217, 53.81433492617265],
@@ -71,8 +103,8 @@ export default function App() {
       <Text>Open up App.js to start working on your app! A Change.</Text>
       <MapView
         initialRegion={{
-          latitude: 51.560609,
-          longitude: 0.153528,
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
