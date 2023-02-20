@@ -2,6 +2,7 @@ import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
+import * as Location from "expo-location";
 import * as turf from "@turf/turf";
 import MapView from "react-native-maps";
 
