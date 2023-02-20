@@ -66,8 +66,6 @@ export default function App() {
     features: [masked],
   };
 
-  console.log(turfCoOrds);
-
   return (
     <View style={styles.container}>
       <Text>Open up App.js to start working on your app! A Change.</Text>
