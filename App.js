@@ -27,12 +27,21 @@ export default function App() {
         console.log(newLocation, '<-- newLocation');
         setLocation(newLocation);
 
-        const revealedFog = turfWorker.FogWithUncoveredRegionsFeature(newLocation);
-        setRevealedFog(revealedFog);
+        const revealedFog = turfWorker.generateNewFog(newLocation);
+        const revealedFog2 = turfWorker.uncoverFog(newLocation, revealedFog);
+
+        setRevealedFog(revealedFog2);
       })
       .catch((err) => {
         console.log(err);
       })
+
+
+      //Get DATA from DB here,
+      //If no previous data is available then generate new fog.
+      
+      //Generate new fog
+
   }, [])
 
 
