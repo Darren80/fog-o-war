@@ -1,30 +1,44 @@
 import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
-import * as Location from "expo-location";
+
 import MapView from "react-native-maps";
-import { turfCoOrds } from "./turf";
+import { TurfWorker } from "./turf";
+import { Locator } from "./Locator";
 
 export default function App() {
   const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [locationErrorMessage, setLocationErrorMessage] = useState(null);
+  const [revealedFog, setRevealedFog] = useState(null);
 
-  (async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      console.log("Permission to access location was denied");
-      setErrorMsg("Permission to access location was denied");
-      return;
-    }
+  const locator = new Locator();
+  const turfWorker = new TurfWorker();
 
-    let newLocation = await Location.getCurrentPositionAsync({
-      enableHighAccuracy: true,
-    });
-    setLocation(newLocation);
-  })();
+  useEffect(() => {
+    locator.requestLocationPermissions()
+      .catch((err) => {
+        setLocationErrorMessage(err);
+      })
 
-  if (errorMsg) {
+    locator.getCurrentPositionAsync()
+      .then((newLocation) => {
+
+        console.log(newLocation, '<-- newLocation');
+        setLocation(newLocation);
+
+        const revealedFog = turfWorker.FogWithUncoveredRegionsFeature(newLocation);
+        setRevealedFog(revealedFog);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+  }, [])
+
+
+
+  
+  if (locationErrorMessage) {
     return (
       <View style={styles.container}>
         <Text style={styles.paragraph}>{errorMsg}</Text>
@@ -43,6 +57,12 @@ export default function App() {
   if (location) {
     return (
       <View style={styles.container}>
+
+        {/* For debugging only, print the state with a button */}
+        <Pressable style={styles.button} onPress={printState}>
+          <Text style={styles.text}>Print React state</Text>
+        </Pressable>
+
         <Text>Open up App.js to start working on your app! A Change.</Text>
         <MapView
           initialRegion={{
@@ -58,11 +78,29 @@ export default function App() {
             top: 30,
           }}
         >
-          <Geojson geojson={turfCoOrds} />
+
+          {
+            revealedFog ?
+              <Geojson
+                geojson={{
+                  features: [revealedFog]
+                }}
+                fillColor='rgba(0, 156, 0, 0.5)'
+                strokeColor="green"
+                strokeWidth={4}
+              />
+              : null
+          }
+
+
         </MapView>
         <StatusBar style="auto" />
       </View>
     );
+  }
+
+  function printState() {
+    console.log(revealedFog, '<-- revealedCoords')
   }
 }
 const styles = StyleSheet.create({
@@ -76,4 +114,20 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: 'black',
+  },
+  text: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: 'white',
+  }
 });
