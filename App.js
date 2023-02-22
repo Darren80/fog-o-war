@@ -14,55 +14,63 @@ export default function App() {
   const [currentUserPosition, setcurrentUserPosition] = useState(null);
 
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
-  const [revealedFog, setRevealedFog] = useState(null);
 
-  const locator = new Locator();
+  const [fogPolygon, setFogPolygon] = useState(null);
+
   const turfWorker = new TurfWorker();
 
   useEffect(() => {
-    locator.requestLocationPermissions()
+
+    //Save fog data to DB every minute
+    
+
+    Location.requestForegroundPermissionsAsync()
+      .then(({ status }) => {
+
+        if (status !== "granted") {
+          console.log("Permission to access location was denied");
+          throw new Error("Permission to access location was denied");
+        }
+
+      })
       .catch((err) => {
         setLocationErrorMessage(err);
       })
 
-    locator.getCurrentPositionAsync()
-      .then((newLocation) => {
-
-        console.log(newLocation, '<-- newLocation');
-        setcurrentUserPosition(newLocation);
-
-        const revealedFog = turfWorker.generateNewFog(newLocation);
-        const revealedFog2 = turfWorker.uncoverFog(newLocation, revealedFog);
-
-        setRevealedFog(revealedFog2);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-
-      Location.watchPositionAsync({
-        accuracy: Location.Accuracy.High,
-        distanceInterval: 10,
-      }, (changedLocation) => {
-        // console.log('<<<<<<<< changedLocation >>>>>>>', changedLocation);
-        //  const revealedFog = turfWorker.generateNewFog(changedLocation);
-        setLocation(changedLocation);
-
-        const revealedFog2 = turfWorker.uncoverFog(changedLocation, revealedFog);
-        setRevealedFog(revealedFog2);
+    //ToDo: Make a modal to explain to the user why background permission is required.
+    Location.requestBackgroundPermissionsAsync()
+      .then(({ status }) => {
 
       });
 
-      //Get DATA from DB here,
-      //If no previous data is available then generate new fog.
+    Location.watchPositionAsync({
+      accuracy: Location.Accuracy.High,
+      distanceInterval: 5,
+    }, (newUserLocation) => {
 
-      //Uncover the fog of a new location when the user's position changes.
+      setcurrentUserPosition(newUserLocation);
+      console.log(newUserLocation, '<-- newLocation');
+
+      if (!fogPolygon) {
+        const newFogPolygon = turfWorker.getFog(newUserLocation);
+        setFogPolygon(newFogPolygon);
+        return;
+      }
+
+      const newFogPolygon = turfWorker.uncoverFog(newUserLocation, fogPolygon);
+      setFogPolygon(newFogPolygon);
+    });
+
+    //Get DATA from DB here,
+    //If no previous data is available then generate new fog.
+
+    //Uncover the fog of a new location when the user's position changes.
 
   }, [])
 
 
 
-  
+
   if (locationErrorMessage) {
     return (
       <View style={styles.container}>
@@ -71,15 +79,15 @@ export default function App() {
     );
   }
 
-  if (!location) {
+  if (!currentUserPosition) {
     return (
       <View style={styles.container}>
-        <Text style={styles.paragraph}>Loading location...{location}</Text>
+        <Text style={styles.paragraph}>Loading location...{currentUserPosition}</Text>
       </View>
     );
   }
 
-  if (location) {
+  if (currentUserPosition) {
     return (
       <View style={styles.container}>
 
@@ -91,8 +99,8 @@ export default function App() {
         <Text>Open up App.js to start working on your app! A Change.</Text>
         <MapView
           initialRegion={{
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
+            latitude: currentUserPosition.coords.latitude,
+            longitude: currentUserPosition.coords.longitude,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
@@ -105,16 +113,16 @@ export default function App() {
         >
 
           {
-            revealedFog ?
+            fogPolygon ?
               <Geojson
                 geojson={{
-                  features: [revealedFog]
+                  features: [fogPolygon]
                 }}
                 fillColor='rgba(0, 156, 0, 0.5)'
                 strokeColor="green"
                 strokeWidth={4}
               >
-                
+
               </Geojson>
               : null
           }
@@ -127,7 +135,7 @@ export default function App() {
   }
 
   function printState() {
-    console.log(revealedFog, '<-- revealedCoords')
+    console.log(fogPolygon, '<-- revealedCoords')
   }
 }
 const styles = StyleSheet.create({
