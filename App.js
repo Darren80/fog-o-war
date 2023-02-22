@@ -10,7 +10,9 @@ import { Locator } from "./Locator";
 import * as Location from "expo-location";
 
 export default function App() {
-  const [location, setLocation] = useState(null);
+  const [previousUserPosition, setpreviousUserPosition] = useState(null);
+  const [currentUserPosition, setcurrentUserPosition] = useState(null);
+
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
   const [revealedFog, setRevealedFog] = useState(null);
 
@@ -27,7 +29,7 @@ export default function App() {
       .then((newLocation) => {
 
         console.log(newLocation, '<-- newLocation');
-        setLocation(newLocation);
+        setcurrentUserPosition(newLocation);
 
         const revealedFog = turfWorker.generateNewFog(newLocation);
         const revealedFog2 = turfWorker.uncoverFog(newLocation, revealedFog);

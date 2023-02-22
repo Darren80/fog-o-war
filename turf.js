@@ -24,8 +24,13 @@ export class TurfWorker {
     );
   }
 
-  getTestData() {
-
+  // GET FOG DATA API EXAMPLE!
+  getFogData() {
+    return {
+      user_id: 123,
+      trip_id: 1,
+      coordinates: [[1.000, 2.000], [1.000, 2.000]]
+    }
   }
 
   circleSize = 0.05; //in kilometers
@@ -44,7 +49,10 @@ export class TurfWorker {
   }
 
   //Returns a Feature
-  uncoverFog(userPosition, fogFeature) {
+  uncoverFog(currentUserPosition, previousUserPosition, fogFeature) {
+
+    //Check if user has moved more than 2 meters from previous position.
+    
     
     //Create new square or circle based on user's position.
     const pointPosition = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
