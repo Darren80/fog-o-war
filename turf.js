@@ -24,8 +24,13 @@ export class TurfWorker {
     );
   }
 
-  getTestData() {
-
+  // GET FOG DATA API EXAMPLE!
+  getFogData() {
+    return {
+      user_id: 123,
+      trip_id: 1,
+      coordinates: [[1.000, 2.000], [1.000, 2.000]]
+    }
   }
 
   circleSize = 0.05; //in kilometers
@@ -44,7 +49,10 @@ export class TurfWorker {
   }
 
   //Returns a Feature
-  uncoverFog(userPosition, fogFeature) {
+  uncoverFog(currentUserPosition, previousUserPosition, fogFeature) {
+
+    //Check if user has moved more than 2 meters from previous position.
+    
     
     //Create new square or circle based on user's position.
     const pointPosition = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
@@ -54,28 +62,28 @@ export class TurfWorker {
     fogFeature = this._pushCoordinate(fogFeature, circleFeature);
 
     //Test areas
-    fogFeature = this._pushCoordinate(fogFeature, this.testPoly1)
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.1, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.15, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.2, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 0))
+    // fogFeature = this._pushCoordinate(fogFeature, this.testPoly1)
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 90))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.1, 90))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.15, 90))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.2, 90))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 90))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 0))
 
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.20, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.30, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.35, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.40, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.45, 145))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.20, 145))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 145))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.30, 145))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.35, 145))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.40, 145))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.45, 145))
 
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.10, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.15, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.20, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.28, 200))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.34, 200))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 270))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.10, 270))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.15, 270))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.20, 270))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 270))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.28, 200))
+    // fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.34, 200))
 
     //Simplify area, reduces points/saves data
     const options = {tolerance: 0.0001, highQuality: true};
@@ -107,85 +115,85 @@ export class TurfWorker {
 
   }
 
-  testPoly1 = turf.polygon([
-    [
-      [
-        0.1345152501665723,
-        51.57275440005134
-      ],
-      [
-        0.1345152501665723,
-        51.57116863536726
-      ],
-      [
-        0.13835933510617338,
-        51.57116863536726
-      ],
-      [
-        0.13835933510617338,
-        51.57275440005134
-      ],
-      [
-        0.1345152501665723,
-        51.57275440005134
-      ]
-    ]
-  ])
+  // testPoly1 = turf.polygon([
+  //   [
+  //     [
+  //       0.1345152501665723,
+  //       51.57275440005134
+  //     ],
+  //     [
+  //       0.1345152501665723,
+  //       51.57116863536726
+  //     ],
+  //     [
+  //       0.13835933510617338,
+  //       51.57116863536726
+  //     ],
+  //     [
+  //       0.13835933510617338,
+  //       51.57275440005134
+  //     ],
+  //     [
+  //       0.1345152501665723,
+  //       51.57275440005134
+  //     ]
+  //   ]
+  // ])
 
-  test() {
-    let poly1 = turf.polygon([
-      [
-        [
-          0.1345152501665723,
-          51.57275440005134
-        ],
-        [
-          0.1345152501665723,
-          51.57116863536726
-        ],
-        [
-          0.13835933510617338,
-          51.57116863536726
-        ],
-        [
-          0.13835933510617338,
-          51.57275440005134
-        ],
-        [
-          0.1345152501665723,
-          51.57275440005134
-        ]
-      ]
-    ])
-    let poly2 = turf.polygon([
-      [
-        [
-          0.1421694015942876,
-          51.57262754091229
-        ],
-        [
-          0.1421694015942876,
-          51.57108405969663
-        ],
-        [
-          0.14873496259707508,
-          51.57108405969663
-        ],
-        [
-          0.14873496259707508,
-          51.57262754091229
-        ],
-        [
-          0.1421694015942876,
-          51.57262754091229
-        ]
-      ]
-    ])
+  // test() {
+  //   let poly1 = turf.polygon([
+  //     [
+  //       [
+  //         0.1345152501665723,
+  //         51.57275440005134
+  //       ],
+  //       [
+  //         0.1345152501665723,
+  //         51.57116863536726
+  //       ],
+  //       [
+  //         0.13835933510617338,
+  //         51.57116863536726
+  //       ],
+  //       [
+  //         0.13835933510617338,
+  //         51.57275440005134
+  //       ],
+  //       [
+  //         0.1345152501665723,
+  //         51.57275440005134
+  //       ]
+  //     ]
+  //   ])
+  //   let poly2 = turf.polygon([
+  //     [
+  //       [
+  //         0.1421694015942876,
+  //         51.57262754091229
+  //       ],
+  //       [
+  //         0.1421694015942876,
+  //         51.57108405969663
+  //       ],
+  //       [
+  //         0.14873496259707508,
+  //         51.57108405969663
+  //       ],
+  //       [
+  //         0.14873496259707508,
+  //         51.57262754091229
+  //       ],
+  //       [
+  //         0.1421694015942876,
+  //         51.57262754091229
+  //       ]
+  //     ]
+  //   ])
 
-    console.log(turf.intersect(poly1, poly2));
+  //   console.log(turf.intersect(poly1, poly2));
 
-    console.log(a.geometry.coordinates);
-  }
+  //   console.log(a.geometry.coordinates);
+  // }
 
   // _transformScale(arrayOfFeatures, scale) {
   //   const features = [];

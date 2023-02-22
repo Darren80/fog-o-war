@@ -7,8 +7,12 @@ import MapView from "react-native-maps";
 import { TurfWorker } from "./turf";
 import { Locator } from "./Locator";
 
+import * as Location from "expo-location";
+
 export default function App() {
-  const [location, setLocation] = useState(null);
+  const [previousUserPosition, setpreviousUserPosition] = useState(null);
+  const [currentUserPosition, setcurrentUserPosition] = useState(null);
+
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
   const [revealedFog, setRevealedFog] = useState(null);
 
@@ -25,7 +29,7 @@ export default function App() {
       .then((newLocation) => {
 
         console.log(newLocation, '<-- newLocation');
-        setLocation(newLocation);
+        setcurrentUserPosition(newLocation);
 
         const revealedFog = turfWorker.generateNewFog(newLocation);
         const revealedFog2 = turfWorker.uncoverFog(newLocation, revealedFog);
@@ -36,6 +40,18 @@ export default function App() {
         console.log(err);
       })
 
+      Location.watchPositionAsync({
+        accuracy: Location.Accuracy.High,
+        distanceInterval: 10,
+      }, (changedLocation) => {
+        // console.log('<<<<<<<< changedLocation >>>>>>>', changedLocation);
+        //  const revealedFog = turfWorker.generateNewFog(changedLocation);
+        setLocation(changedLocation);
+
+        const revealedFog2 = turfWorker.uncoverFog(changedLocation, revealedFog);
+        setRevealedFog(revealedFog2);
+
+      });
 
       //Get DATA from DB here,
       //If no previous data is available then generate new fog.
@@ -122,8 +138,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   map: {
-    width: "100%",
-    height: "100%",
+    width: "90%",
+    height: "90%",
   },
   button: {
     alignItems: 'center',
