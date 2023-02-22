@@ -3,11 +3,11 @@ import * as FileSystem from 'expo-file-system';
 
 export class TurfWorker {
   constructor() {
-
+    // this.test();
   }
 
   //Returns a Feature
-  worldFeature() {
+  worldPolygon() {
     return turf.polygon(
       [
         [
@@ -24,11 +24,15 @@ export class TurfWorker {
     );
   }
 
+  getTestData() {
+
+  }
+
   circleSize = 0.05; //in kilometers
 
   generateNewFog(userPosition) {
     //Create new world bounded polygon
-    const worldFeature = this.worldFeature();
+    const worldFeature = this.worldPolygon();
 
     //Create square polygon based on user's position.
     const pointPosition = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
@@ -42,11 +46,11 @@ export class TurfWorker {
   //Returns a Feature
   uncoverFog(userPosition, fogFeature) {
     
-    //Create new square based on user's position.
+    //Create new square or circle based on user's position.
     const pointPosition = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
     const circleFeature = turf.circle(pointPosition, this.circleSize, { steps: 12 });
 
-    //Combine the world polygon holes and the square polygon hole.
+    //Combine the world polygon holes and the square or circle polygon hole.
     fogFeature = this._pushCoordinate(fogFeature, circleFeature);
 
     //Test areas
@@ -76,7 +80,6 @@ export class TurfWorker {
     //Simplify area, reduces points/saves data
     const options = {tolerance: 0.0001, highQuality: true};
     fogFeature = turf.simplify(fogFeature, options);
-    // this.test();
 
     console.log(fogFeature.geometry.coordinates);
     return fogFeature;
