@@ -39,8 +39,8 @@ export default function App() {
 
       //Get DATA from DB here,
       //If no previous data is available then generate new fog.
-      
-      //Generate new fog
+
+      //Uncover the fog of a new location when the user's position changes.
 
   }, [])
 
@@ -97,7 +97,9 @@ export default function App() {
                 fillColor='rgba(0, 156, 0, 0.5)'
                 strokeColor="green"
                 strokeWidth={4}
-              />
+              >
+                
+              </Geojson>
               : null
           }
 
