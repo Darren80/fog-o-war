@@ -11,10 +11,11 @@ import * as Location from "expo-location";
 
 export default function App() {
   const [previousUserPosition, setpreviousUserPosition] = useState(null);
-  const [currentUserPosition, setcurrentUserPosition] = useState(null);
+  const [currentUserPosition, setCurrentUserPosition] = useState(null);
 
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
 
+  const [username, setUsername] = useState(null);
   const [fogPolygon, setFogPolygon] = useState(null);
 
   const turfWorker = new TurfWorker();
@@ -22,7 +23,6 @@ export default function App() {
   useEffect(() => {
 
     //Save fog data to DB every minute
-    
 
     Location.requestForegroundPermissionsAsync()
       .then(({ status }) => {
@@ -45,20 +45,11 @@ export default function App() {
 
     Location.watchPositionAsync({
       accuracy: Location.Accuracy.High,
-      distanceInterval: 5,
+      distanceInterval: 10,
     }, (newUserLocation) => {
-
-      setcurrentUserPosition(newUserLocation);
-      console.log(newUserLocation, '<-- newLocation');
-
-      if (!fogPolygon) {
-        const newFogPolygon = turfWorker.getFog(newUserLocation);
-        setFogPolygon(newFogPolygon);
-        return;
-      }
-
-      const newFogPolygon = turfWorker.uncoverFog(newUserLocation, fogPolygon);
-      setFogPolygon(newFogPolygon);
+      setCurrentUserPosition(newUserLocation);
+      // console.log(newUserLocation, '<-- newLocation');
+      // console.log(!fogPolygon, '<-- !fogPolygon true/false', fogPolygon, '<-- fogPolygon');
     });
 
     //Get DATA from DB here,
@@ -66,9 +57,20 @@ export default function App() {
 
     //Uncover the fog of a new location when the user's position changes.
 
+
+    const newFogPolygon = turfWorker.getFog(currentUserPosition);
+    setFogPolygon(newFogPolygon);
   }, [])
 
+  useEffect(() => {
+    console.log(fogPolygon);
+    if (!fogPolygon) {
+      return;
+    }
 
+    const newFogPolygon = turfWorker.uncoverFog(currentUserPosition, fogPolygon);
+    setFogPolygon(newFogPolygon);
+  }, [currentUserPosition])
 
 
   if (locationErrorMessage) {
