@@ -1,70 +1,50 @@
 import { useEffect, useState } from "react";
+
 import { StatusBar } from "expo-status-bar";
+import * as Location from "expo-location";
+import * as TaskManager from 'expo-task-manager';
+
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
-
 import MapView from "react-native-maps";
+
+
+import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
-import { Locator } from "./Locator";
 
-import * as Location from "expo-location";
 
+
+const turfWorker = new TurfWorker();
 export default function App() {
-  const [previousUserPosition, setpreviousUserPosition] = useState(null);
+  // const [previousUserPosition, setpreviousUserPosition] = useState(null);
+  // const [username, setUsername] = useState(null);
+
   const [currentUserPosition, setCurrentUserPosition] = useState(null);
 
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
-
-  const [username, setUsername] = useState(null);
+  
   const [fogPolygon, setFogPolygon] = useState(null);
-
-  const turfWorker = new TurfWorker();
 
   useEffect(() => {
 
-    //Save fog data to DB every minute
-
-    Location.requestForegroundPermissionsAsync()
-      .then(({ status }) => {
-
-        if (status !== "granted") {
-          console.log("Permission to access location was denied");
-          throw new Error("Permission to access location was denied");
-        }
-
-      })
-      .catch((err) => {
-        setLocationErrorMessage(err);
-      })
+    //TODO: Decide how often the points data should be written to the database
 
     //ToDo: Make a modal to explain to the user why background permission is required.
-    Location.requestBackgroundPermissionsAsync()
-      .then(({ status }) => {
-
-      });
-
+    requestPermissions();
+    
     Location.watchPositionAsync({
-      accuracy: Location.Accuracy.High,
-      distanceInterval: 10,
+      accuracy: Location.Accuracy.Highest,
+      distanceInterval: 20,
     }, (newUserLocation) => {
       setCurrentUserPosition(newUserLocation);
-      // console.log(newUserLocation, '<-- newLocation');
-      // console.log(!fogPolygon, '<-- !fogPolygon true/false', fogPolygon, '<-- fogPolygon');
     });
 
-    //Get DATA from DB here,
-    //If no previous data is available then generate new fog.
-
-    //Uncover the fog of a new location when the user's position changes.
-
-
-    const newFogPolygon = turfWorker.getFog(currentUserPosition);
-    setFogPolygon(newFogPolygon);
   }, [])
 
   useEffect(() => {
-    console.log(fogPolygon);
     if (!fogPolygon) {
+      const newFogPolygon = turfWorker.getFog(currentUserPosition);
+      setFogPolygon(newFogPolygon);
       return;
     }
 
@@ -88,6 +68,12 @@ export default function App() {
       </View>
     );
   }
+
+  const PermissionsButton = () => (
+    <View style={styles.container}>
+      <Button onPress={requestPermissions} title="Enable background location" />
+    </View>
+  );
 
   if (currentUserPosition) {
     return (
