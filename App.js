@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 
 import MapView from "react-native-maps";
@@ -14,8 +14,9 @@ export default function App() {
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
   const [revealedFog, setRevealedFog] = useState(null);
   
-  const [marker, setMarker] = useState([]);
+  const [markers, setMarkers] = useState([]);
   const [clickMarker, setClickMarker] = useState(false);
+  const [imageAdded, setImageAdded] = useState(false);
 
   const locator = new Locator();
   const turfWorker = new TurfWorker();
@@ -41,19 +42,19 @@ export default function App() {
         console.log(err);
       })
 
-      Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 10000, 
-          distanceInterval: 1},
-        (changedLocation) => {
-          setLocation(changedLocation);
+      // Location.watchPositionAsync(
+      //   {
+      //     accuracy: Location.Accuracy.High,
+      //     timeInterval: 10000, 
+      //     distanceInterval: 1},
+      //   (changedLocation) => {
+      //     setLocation(changedLocation);
 
-          const revealedFog2 = turfWorker.uncoverFog(changedLocation, revealedFog);
+      //     const revealedFog2 = turfWorker.uncoverFog(changedLocation, revealedFog);
 
-          setRevealedFog(revealedFog2);
-        }
-      );
+      //     setRevealedFog(revealedFog2);
+      //   }
+      // );
 
 
       //Get DATA from DB here,
@@ -62,7 +63,12 @@ export default function App() {
       //Uncover the fog of a new location when the user's position changes.
 
   }, [])
-  console.log(marker, '<-- marker');
+  
+  console.log('----------------------------------------');
+  console.log(markers, '<-- markers');
+  console.log(clickMarker, '<-- clickMarker');
+  console.log(imageAdded, '<-- imageAdded');
+  console.log('----------------------------------------');
 
   if (locationErrorMessage) {
     return (
@@ -83,15 +89,6 @@ export default function App() {
   if (location) {
     return (
       <View style={styles.container}>
-                      {/* <View style={styles.buttonContainer}> */}
-   
-   {/* <Pressable style={styles.button} onPress={pickImage}>
-     <Text style={styles.text}>Pick Image</Text>
-   </Pressable>
-   <Pressable style={styles.button} onPress={openCamera}>
-     <Text style={styles.text}>Open Camera</Text>
-   </Pressable> */}
-   {/* </View> */}
         {/* <Text>Open up App.js to start working on your app! A Change.</Text> */}
         <MapView
           initialRegion={{
@@ -106,16 +103,24 @@ export default function App() {
           mapPadding={{
             top: 30,
           }}
-          onPress={(e) => setMarker([...marker,{
+          onPress={(e) => setMarkers([...markers,{
             coords: e.nativeEvent.coordinate
           }])}
         >
           {
-            marker.map((marker, i) => (
+            markers.map((marker, i) => (
               <Marker 
               coordinate={marker.coords} 
               key={i}
-              onPress={() => setClickMarker(true)}>
+              onPress={() => {
+                setClickMarker(current => !current);
+                setImageAdded(current => !current);
+              }}>
+                {
+                  imageAdded ? 
+                  <Image source={{uri: marker.image}} style={{width: 30, height: 30}} />
+                 : null
+                }
               </Marker>
             ))
           }
@@ -138,7 +143,7 @@ export default function App() {
         {
               
               clickMarker ?
-              <ImageAdder/>: null
+              <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded}/>: null
   
         }
       </View>

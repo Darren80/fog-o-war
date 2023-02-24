@@ -1,10 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Pressable } from "react-native";
 
-export default function ImageAdder() {
-
-    const [image, setImage] = useState(null);
+export default function ImageAdder({ setImageAdded, setMarkers }) {
 
     const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -19,7 +17,15 @@ export default function ImageAdder() {
     console.log(result);
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImageAdded(true);
+          setMarkers((currMarker) => {
+          
+            const position = currMarker.length - 1;
+
+            currMarker[position]['image'] = result.assets[0].uri;
+
+            return currMarker;    
+          });   
     }
   };
 
@@ -38,22 +44,55 @@ export default function ImageAdder() {
     console.log(result);
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImageAdded(true);
+          setMarkers((currMarker) => {
+          
+            const position = currMarker.length - 1;
+
+            currMarker[position]['image'] = result.assets[0].uri;
+
+            return currMarker;    
+          });   
         }
     };
 
     return (
-        <Text style={styles.container}>Welcome to add an image!</Text>
+      <View style={styles.buttonContainer}>
+      <Pressable style={styles.button} onPress={pickImage}>
+        <Text style={styles.text}>Pick Image</Text>
+      </Pressable>
+      <Pressable style={styles.button} onPress={openCamera}>
+        <Text style={styles.text}>Open Camera</Text>
+      </Pressable>
+   </View>
     )
 
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        alignItems: "center",
-        justifyContent: "center",
-      }
+  buttonContainer: {
+    flex:1, 
+    flexDirection:'row',     
+    alignItems:'flex-end',
+    marginLeft: 10
+  },
+  button: {
+    width:'40%',
+    marginHorizontal: 10,
+    marginBottom: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 4,
+    elevation: 2,
+    backgroundColor: 'black',
+  },
+  text: {
+    fontSize: 12,
+    lineHeight: 15,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    alignSelf: 'center',
+    color: 'white',
+  }
 });
 
