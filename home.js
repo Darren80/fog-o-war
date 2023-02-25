@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import React from "react"
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
-import { IconButton , MD3Colors } from 'react-native-paper'
+import { IconButton , MD3Colors, Avatar } from 'react-native-paper'
 import MapView from "react-native-maps";
 import { TurfWorker } from "./turf";
 import { Locator } from "./Locator";
@@ -13,7 +12,7 @@ import * as Location from "expo-location";
 const home = ({navigation}) => {
   const [previousUserPosition, setpreviousUserPosition] = useState(null);
   const [currentUserPosition, setCurrentUserPosition] = useState(null);
-
+  const [loggedIn, setLoggedIn] = useState(true)
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
 
   const [username, setUsername] = useState(null);
@@ -133,12 +132,21 @@ const home = ({navigation}) => {
 
         </MapView>
         <View style={styles.navButton}>
-            <IconButton
-                icon="account"
+             <IconButton
+             icon='account'
+             iconColor={MD3Colors.error50}
+             style={styles.navButton}
+             size={40}
+             onPress={()=> loggedIn? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+             />
+            {/* <Avatar.Image size={24} source={'https://www.google.com/search?q=dog&rlz=1C1CHBF_en-GBGB991GB991&sxsrf=AJOqlzUbfns4rj4KgJIHlZgFvX__FUTesA:1677347401935&tbm=isch&source=iu&ictx=1&vet=1&fir=NN1-QGCky_XgzM%252CvL0suvKfyYaqHM%252C%252Fm%252F0bt9lr%253BOyQGKst6Lara3M%252CDj243kHCP9nJ-M%252C_%253BeQsdEWaZ6MHrQM%252C2prjuOFdTo6X8M%252C_%253BGbsqgMoKCwHzMM%252C65_J7MmDboKEcM%252C_%253BLdkDcR8aYOxQXM%252CsmcHwKUZvdWsaM%252C_&usg=AI4_-kQerRqCtAwxi4UQGOMadH6_xZ-OOQ&sa=X&ved=2ahUKEwjjqLqAnrH9AhWVFcAKHRx_BwYQ_B16BAh8EAE#imgrc=NN1-QGCky_XgzM'}/>
+             :
+             <IconButton
                 iconColor={MD3Colors.error50}
                 size={40}
-                onPress={() => navigation.navigate('SignIn')}
-                />
+                //onPress={()=> loggedIn? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+                onPress={()=> navigation.navigate('SignIn')}
+                />  */}
         </View>
         <StatusBar style="auto" />
       </View>
@@ -177,8 +185,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     top: '20%',
+    left: '75%',
     alignSelf: 'flex-end',
-    paddingHorizontal:15
+    paddingHorizontal:0
   },
   text: {
     fontSize: 16,

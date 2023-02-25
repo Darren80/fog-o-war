@@ -7,9 +7,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 const Stack = createStackNavigator();
 import signIn from './signIn.js'
 import home from './home.js'
+import profile from './profile.js'
 
 class App extends React.Component {
   render() {
+
     return (
           <NavigationContainer>
             <Stack.Navigator>
@@ -20,6 +22,10 @@ class App extends React.Component {
               <Stack.Screen
                 name="SignIn"
                 component={signIn}
+              />
+              <Stack.Screen
+                name="Profile"
+                component={profile}
               />
             </Stack.Navigator>
           </NavigationContainer>
