@@ -6,7 +6,6 @@ import MapView from "react-native-maps";
 import { TurfWorker } from "./turf";
 import { Locator } from "./Locator";
 
-import * as Location from 'expo-location';
 import ImageAdder from "./ImageAdder";
 
 export default function App() {
@@ -42,36 +41,14 @@ export default function App() {
       })
       .catch((err) => {
         console.log(err);
-      })
-
-      Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 10000, 
-          distanceInterval: 1},
-        (changedLocation) => {
-          setLocation(changedLocation);
-
-          const revealedFog2 = turfWorker.uncoverFog(changedLocation, revealedFog);
-
-          setRevealedFog(revealedFog2);
-    
-        }
-      );
-
+      });
 
       //Get DATA from DB here,
       //If no previous data is available then generate new fog.
 
       //Uncover the fog of a new location when the user's position changes.
 
-  }, [])
-  
-  // console.log('----------------------------------------');
-  // console.log(markers, '<-- markers');
-  // console.log(clickMarker, '<-- clickMarker');
-  // console.log(imageAdded, '<-- imageAdded');
-  // console.log('----------------------------------------');
+  }, []);
 
   const markerPositionSelected = (e) => {
     
@@ -166,6 +143,7 @@ export default function App() {
     );
   }
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -176,32 +154,5 @@ const styles = StyleSheet.create({
   map: {
     width: "88%",
     height: "88%",
-  },
-  buttonContainer: {
-    flex:1, 
-    flexDirection:'row',     
-    alignItems:'flex-end',
-    marginLeft: 50
-  },
-  button: {
-    width:'40%',
-    marginHorizontal: 10,
-    marginBottom: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 4,
-    elevation: 2,
-    backgroundColor: 'black',
-  },
-  imageContainer: {
-    padding: 30
-  },
-  text: {
-    fontSize: 12,
-    lineHeight: 15,
-    fontWeight: 'bold',
-    letterSpacing: 0.25,
-    alignSelf: 'center',
-    color: 'white',
   }
 });

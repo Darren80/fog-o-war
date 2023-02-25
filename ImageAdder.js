@@ -1,5 +1,4 @@
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from "react-native";
 
 export default function ImageAdder({ setImageAdded, setMarkers }) {
@@ -13,8 +12,6 @@ export default function ImageAdder({ setImageAdded, setMarkers }) {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.canceled) {
       setImageAdded(true);
@@ -39,9 +36,6 @@ export default function ImageAdder({ setImageAdded, setMarkers }) {
         }
 
     const result = await ImagePicker.launchCameraAsync();
-
-    // Explore the result
-    console.log(result);
 
     if (!result.canceled) {
       setImageAdded(true);
