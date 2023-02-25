@@ -11,27 +11,38 @@ import MapView from "react-native-maps";
 
 import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
+import API from "./models/model-apis";
 
 
 
 const turfWorker = new TurfWorker();
 export default function App() {
-  // const [previousUserPosition, setpreviousUserPosition] = useState(null);
-  // const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState(null);
 
   const [currentUserPosition, setCurrentUserPosition] = useState(null);
 
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
-  
+
   const [fogPolygon, setFogPolygon] = useState(null);
 
   useEffect(() => {
+    //Create new user
+    const api = new API('bobby', 'password');
+    api.postNewUser()
+    .then((username) => { setUsername(username); console.log(username); })
+    .catch((error) => {
+      console.error(error);
+    })
 
     //TODO: Decide how often the points data should be written to the database
+    //TODO: Make a modal to explain to the user why background permission is required.
 
-    //ToDo: Make a modal to explain to the user why background permission is required.
-    requestPermissions();
-    
+    requestPermissions()
+    .catch((err) => {
+      setLocationErrorMessage(err);
+    })
+
+    //Will run when location changes while app is in the foreground
     Location.watchPositionAsync({
       accuracy: Location.Accuracy.Highest,
       distanceInterval: 20,
@@ -75,16 +86,20 @@ export default function App() {
     </View>
   );
 
+  function printState() {
+    const newFogPolygon = turfWorker.getFog(currentUserPosition);
+    setFogPolygon(newFogPolygon);
+  }
+
   if (currentUserPosition) {
     return (
       <View style={styles.container}>
 
         {/* For debugging only, print the state with a button */}
         <Pressable style={styles.button} onPress={printState}>
-          <Text style={styles.text}>Print React state</Text>
+          <Text style={styles.text}>Reset fog</Text>
         </Pressable>
 
-        <Text>Open up App.js to start working on your app! A Change.</Text>
         <MapView
           initialRegion={{
             latitude: currentUserPosition.coords.latitude,
@@ -122,9 +137,7 @@ export default function App() {
     );
   }
 
-  function printState() {
-    console.log(fogPolygon, '<-- revealedCoords')
-  }
+
 }
 const styles = StyleSheet.create({
   container: {

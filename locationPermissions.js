@@ -7,29 +7,6 @@ const LOCATION_TASK_NAME = 'background-location-task';
 
 export function requestPermissions() {
 
-    const requestPermissions = async () => {
-        const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
-        if (foregroundStatus === 'granted') {
-            const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
-            if (backgroundStatus === 'granted') {
-                await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-                    accuracy: Location.Accuracy.Highest,
-                    deferredUpdatesDistance: 20
-                });
-            }
-        } else {
-            console.log("Permission to access location was denied");
-            throw new Error("Permission to access location was denied");
-        }
-    };
-    requestPermissions();
-
-    const PermissionsButton = () => (
-        <View style={styles.container}>
-            <Button onPress={requestPermissions} title="Enable background location" />
-        </View>
-    );
-
     TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
         if (error) {
             // Error occurred - check `error.message` for more details.
@@ -40,6 +17,34 @@ export function requestPermissions() {
             // do something with the locations captured in the background
         }
     });
+
+    return Location.requestForegroundPermissionsAsync()
+        .then(({ status: foregroundStatus }) => {
+            if (foregroundStatus === 'granted') {
+                return Location.requestBackgroundPermissionsAsync();
+            } else {
+                console.log("Permission to access location was denied");
+                throw new Error("Permission to access location was denied");
+            }
+        })
+        .then(({ status: backgroundStatus }) => {
+            if (backgroundStatus === 'granted') {
+                //Will run expo-taskmanager if location changes while app is in the background
+                Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+                    accuracy: Location.Accuracy.Highest,
+                    deferredUpdatesDistance: 20
+                });
+            } else {
+                console.log("Permission to access location in the background was denied");
+                throw new Error("Permission to access location in the background was denied");
+            }
+        })
+
+    const PermissionsButton = () => (
+        <View style={styles.container}>
+            <Button onPress={requestPermissions} title="Enable background location" />
+        </View>
+    );
 }
 
 

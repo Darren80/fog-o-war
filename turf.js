@@ -1,6 +1,6 @@
 import * as turf from "@turf/turf";
 import * as FileSystem from 'expo-file-system';
-import { Database } from "./DATABASE";
+import { Database } from "./MOCK DATABASE";
 
 export class TurfWorker {
 
@@ -44,31 +44,39 @@ export class TurfWorker {
     fogPolygon = this._addPolygonToFog(fogPolygon, circlePolygon);
 
     //Simplify area, reduces points -> reduce data size, reduce processing power needed to display.
-    const options = { tolerance: 0.0001, highQuality: true };
-    fogPolygon = turf.simplify(fogPolygon, options);
+    //// const options = { tolerance: 0.0001, highQuality: true };
+    //// fogPolygon = turf.simplify(fogPolygon, options);
 
     return fogPolygon;
   }
 
-  // EXAMPLE POST FOR FOG DATA FROM THE API.
-  postFogData = {
-    username: this.username,
-    trip_id: 0,
-    points: []
+  //Brand new coordinates for "trip_id_1" to store based on username and trip_id.
+  exampleFogDataPostRequest = {
+    user_id: this.user_id,
+    trips: [{
+      trip_id: 0,
+      points: [
+        
+      ]
+    }]
   }
 
 
   _addUserPositionToDB(userPosition, tripId, circleSize) {
     // console.log(userPosition, ' trip id-->', tripId);
 
-    let userLongitude = userPosition.coords.longitude;
-    let userLatitude = userPosition.coords.latitude;
+    const userLongitude = userPosition.coords.longitude;
+    const userLatitude = userPosition.coords.latitude;
 
     //Save user's position to DB store.
-    this.postFogData.points.push({
+    const trip = this.exampleFogDataPostRequest.trips.find((trip) => trip.trip_id === 0);
+
+    trip.points.push({
       coordinates: [userLongitude, userLatitude],
       circleSize: circleSize
     });
+
+    console.log(this.exampleFogDataPostRequest);
   }
 
 
@@ -167,18 +175,17 @@ export class TurfWorker {
 
   }
 
-
-
-
-
-  // _transformScale(arrayOfFeatures, scale) {
-  //   const features = [];
-  //   for (let i = 0; i < arrayOfFeatures.length; i++) {
-  //     features.push(turf.transformScale(arrayOfFeatures[i], scale));
-  //   }
-  //   return features;
-  // }
 }
+
+
+
+// _transformScale(arrayOfFeatures, scale) {
+//   const features = [];
+//   for (let i = 0; i < arrayOfFeatures.length; i++) {
+//     features.push(turf.transformScale(arrayOfFeatures[i], scale));
+//   }
+//   return features;
+// }
 
 class TurfHelper {
   constructor() {
