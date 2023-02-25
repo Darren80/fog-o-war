@@ -18,6 +18,8 @@ export default function App() {
   const [clickMarker, setClickMarker] = useState(false);
   const [imageAdded, setImageAdded] = useState(false);
 
+  const [pointsWithingPolygon, setPointsWithinPolygon] = useState(false);
+
   const locator = new Locator();
   const turfWorker = new TurfWorker();
 
@@ -42,19 +44,20 @@ export default function App() {
         console.log(err);
       })
 
-      // Location.watchPositionAsync(
-      //   {
-      //     accuracy: Location.Accuracy.High,
-      //     timeInterval: 10000, 
-      //     distanceInterval: 1},
-      //   (changedLocation) => {
-      //     setLocation(changedLocation);
+      Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 10000, 
+          distanceInterval: 1},
+        (changedLocation) => {
+          setLocation(changedLocation);
 
-      //     const revealedFog2 = turfWorker.uncoverFog(changedLocation, revealedFog);
+          const revealedFog2 = turfWorker.uncoverFog(changedLocation, revealedFog);
 
-      //     setRevealedFog(revealedFog2);
-      //   }
-      // );
+          setRevealedFog(revealedFog2);
+    
+        }
+      );
 
 
       //Get DATA from DB here,
@@ -64,11 +67,31 @@ export default function App() {
 
   }, [])
   
+  // console.log('----------------------------------------');
+  // console.log(markers, '<-- markers');
+  // console.log(clickMarker, '<-- clickMarker');
+  // console.log(imageAdded, '<-- imageAdded');
+  // console.log('----------------------------------------');
+
   console.log('----------------------------------------');
-  console.log(markers, '<-- markers');
-  console.log(clickMarker, '<-- clickMarker');
-  console.log(imageAdded, '<-- imageAdded');
+  console.log(pointsWithingPolygon, '<-- pointsWithingPolygon');
+  // console.log(clickMarker, '<-- clickMarker');
+  // console.log(imageAdded, '<-- imageAdded');
   console.log('----------------------------------------');
+
+  const markerPositionSelected = (e) => {
+    
+    const markerPosition = e.nativeEvent.coordinate;
+
+    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition,revealedFog);
+
+    if(checkUserWithinPolygon) {
+      setPointsWithinPolygon(true);
+      setMarkers([...markers,{
+        coords: markerPosition
+      }]);
+    }      
+  }
 
   if (locationErrorMessage) {
     return (
@@ -103,12 +126,12 @@ export default function App() {
           mapPadding={{
             top: 30,
           }}
-          onPress={(e) => setMarkers([...markers,{
-            coords: e.nativeEvent.coordinate
-          }])}
+          onPress={(e) => markerPositionSelected(e)}
         >
           {
-            markers.map((marker, i) => (
+            pointsWithingPolygon ?
+            (
+              markers.map((marker, i) => (
               <Marker 
               coordinate={marker.coords} 
               key={i}
@@ -123,6 +146,7 @@ export default function App() {
                 }
               </Marker>
             ))
+            ) : null
           }
           {
             revealedFog ?

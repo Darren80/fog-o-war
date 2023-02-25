@@ -31,15 +31,18 @@ export class TurfWorker {
   circleSize = 0.05; //in kilometers
 
   generateNewFog(userPosition) {
+
     //Create new world bounded polygon
     const worldFeature = this.worldPolygon();
 
     //Create square polygon based on user's position.
     const pointPosition = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
+
     const circleFeature = turf.circle(pointPosition, this.circleSize, { steps: 12 });
 
     //Combine the world and have the square polygon be a "hole".
     const fogFeature = this._pushCoordinate(worldFeature, circleFeature);
+
     return fogFeature;
   }
 
@@ -88,16 +91,19 @@ export class TurfWorker {
   _pushCoordinate(fogFeature, newPolygon) {
 
     //For each hole in the polygon
-    for (let i = 1; i < fogFeature.geometry.coordinates.length; i++) {
+    if(fogFeature !== null ||fogFeature !== undefined)
+    {
+      for (let i = 1; i < fogFeature.geometry.coordinates.length; i++) {
       
-      const holePolygon = turf.polygon([fogFeature.geometry.coordinates[i]]);
-      //If one of the holes intersect with the new shape then join them together.
-      if (turf.intersect(holePolygon, newPolygon)) {
-        const union = turf.union(holePolygon, newPolygon);
-
-        fogFeature.geometry.coordinates[i] = union.geometry.coordinates[0];
-        return fogFeature;
-      }
+        const holePolygon = turf.polygon([fogFeature.geometry.coordinates[i]]);
+        //If one of the holes intersect with the new shape then join them together.
+        if (turf.intersect(holePolygon, newPolygon)) {
+          const union = turf.union(holePolygon, newPolygon);
+  
+          fogFeature.geometry.coordinates[i] = union.geometry.coordinates[0];
+          return fogFeature;
+        }
+    }
 
     }
 
@@ -105,6 +111,32 @@ export class TurfWorker {
     fogFeature.geometry.coordinates.push(newPolygon.geometry.coordinates[0]);
     return fogFeature;
 
+  }
+
+  checkUserPointsWithinPolygon(userPosition, fogFeature) {
+    
+    const pointPosition = turf.point([userPosition.longitude, userPosition.latitude]);
+
+      const coordinatesArray = fogFeature.geometry.coordinates;
+
+      let result = false;
+
+      coordinatesArray.forEach((position) => {
+
+      const searchWithin = turf.booleanPointInPolygon(pointPosition, turf.polygon([position]));
+
+      console.log(searchWithin, '<-- searchWithin');
+
+     if(searchWithin)
+        result = true;
+      else
+        result = false;
+    });
+
+    console.log(result, '<-- result');
+
+    return result;
+  
   }
 
   // testPoly1 = turf.polygon([
