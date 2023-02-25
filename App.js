@@ -73,12 +73,6 @@ export default function App() {
   // console.log(imageAdded, '<-- imageAdded');
   // console.log('----------------------------------------');
 
-  console.log('----------------------------------------');
-  console.log(pointsWithingPolygon, '<-- pointsWithingPolygon');
-  // console.log(clickMarker, '<-- clickMarker');
-  // console.log(imageAdded, '<-- imageAdded');
-  console.log('----------------------------------------');
-
   const markerPositionSelected = (e) => {
     
     const markerPosition = e.nativeEvent.coordinate;
@@ -112,7 +106,7 @@ export default function App() {
   if (location) {
     return (
       <View style={styles.container}>
-        {/* <Text>Open up App.js to start working on your app! A Change.</Text> */}
+        <Text>Fog-Of-War</Text>
         <MapView
           initialRegion={{
             latitude: location.coords.latitude,
@@ -164,11 +158,9 @@ export default function App() {
               : null
           }
         </MapView>
-        {
-              
+        { 
               clickMarker ?
               <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded}/>: null
-  
         }
       </View>
     );

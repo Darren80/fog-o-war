@@ -115,25 +115,23 @@ export class TurfWorker {
 
   checkUserPointsWithinPolygon(userPosition, fogFeature) {
     
+    //Create square polygon based on user's position.
     const pointPosition = turf.point([userPosition.longitude, userPosition.latitude]);
 
-      const coordinatesArray = fogFeature.geometry.coordinates;
+    const coordinatesArray = fogFeature.geometry.coordinates;
 
-      let result = false;
+    let result = false;
 
-      coordinatesArray.forEach((position) => {
-
-      const searchWithin = turf.booleanPointInPolygon(pointPosition, turf.polygon([position]));
-
-      console.log(searchWithin, '<-- searchWithin');
+    coordinatesArray.forEach((position) => {
+    
+    //Return true if the user's position is inside the uncovered area
+    const searchWithin = turf.booleanPointInPolygon(pointPosition, turf.polygon([position]));
 
      if(searchWithin)
         result = true;
       else
         result = false;
     });
-
-    console.log(result, '<-- result');
 
     return result;
   
