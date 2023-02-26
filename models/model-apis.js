@@ -13,8 +13,8 @@ class API {
         timeout: 1000
     });
     //Our API's
-    getFogData = (username) => {
-        return axios.get(`/trips/${username}`)
+    getFogData = (user_id) => {
+        return axios.get(`/trips/${user_id}`)
             .then((response) => {
                 if (!response.status === 200) {
                     throw new Error("Error: " + response.status);
@@ -24,7 +24,7 @@ class API {
     }
 
     postFogData = (partialFogData) => {
-        return axios.post(`/fog/${username}`, {
+        return axios.post(`/trips/${user_id}`, {
             data: partialFogData
         })
             .then((response) => {
@@ -48,7 +48,7 @@ class API {
         return axios.post(`/users`, {
             data: {
                 username: this.username,
-                password: this.password
+                display: this.password
             }
         })
             .then((response) => {
@@ -67,7 +67,7 @@ class API {
     }
 
     postNewMarker = () => {
-        
+
     }
 
     getNewMarker = () => {
