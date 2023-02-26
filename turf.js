@@ -1,13 +1,203 @@
 import * as turf from "@turf/turf";
 import * as FileSystem from 'expo-file-system';
+import { Database } from "./MOCK DATABASE";
 
 export class TurfWorker {
-  constructor() {
-    // this.test();
+
+  turfHelper = new TurfHelper();
+  username = '';
+  constructor(username) {
+    this.username = username;
   }
 
-  //Returns a Feature
-  worldPolygon() {
+  getFog(userLocation) {
+    const fogPolygon = this._getFogPolygonFromDB();
+
+    if (!fogPolygon) {
+      return this._generateNewFogPolygon(userLocation);
+    } else {
+      return fogPolygon;
+    }
+  }
+
+  //Uncovers the fog based on the user's current position
+  //Input:
+  //Output:
+  uncoverFog(userPosition, fogPolygon) {
+
+    //TODO: block the uncovering of fog if the user's speed exceeds walking or cycling speed.
+    if (userPosition.coords.speed > 7.15264) { //If the user's speed is above or equal to 16Mp/h or 7.15264m/s
+      //Create a text message to the user telling them their speed is too high to track their progress.
+      console.log('Speed exceeds maximum!');
+    }
+
+    //TODO: calculate the user's elevation above the ground, expand the circle more when the user is higher up.
+    this.turfHelper._determineCircleSizeBasedOnElevation(userPosition);
+
+    //Add the coordinates to memory
+    this._addUserPositionToDB(userPosition, 1, this.circleSize);
+
+    //Create new circle polygon based on the user's position.
+    const circlePolygon = this.turfHelper._createCirclePolygonFromUserPosition(userPosition, this.circleSize);
+
+    //Extend the fog using our new circle polygon.
+    fogPolygon = this._addPolygonToFog(fogPolygon, circlePolygon);
+
+    //Simplify area, reduces points -> reduce data size, reduce processing power needed to display.
+    //// const options = { tolerance: 0.0001, highQuality: true };
+    //// fogPolygon = turf.simplify(fogPolygon, options);
+
+    return fogPolygon;
+  }
+
+  //Brand new coordinates for "trip_id_1" to store based on username and trip_id.
+  exampleFogDataPostRequest = {
+    user_id: this.user_id,
+    trips: [{
+      trip_id: 0,
+      points: [
+        
+      ]
+    }]
+  }
+
+
+  _addUserPositionToDB(userPosition, tripId, circleSize) {
+    // console.log(userPosition, ' trip id-->', tripId);
+
+    const userLongitude = userPosition.coords.longitude;
+    const userLatitude = userPosition.coords.latitude;
+
+    //Save user's position to DB store.
+    const trip = this.exampleFogDataPostRequest.trips.find((trip) => trip.trip_id === 0);
+
+    trip.points.push({
+      coordinates: [userLongitude, userLatitude],
+      circleSize: circleSize
+    });
+
+    console.log(this.exampleFogDataPostRequest);
+  }
+
+
+  circleSize = 0.05
+  //Runs if the user has previous data in the database.
+  _generateNewFogPolygon(userPosition) {
+    //Add the coordinates to memory
+    this._addUserPositionToDB(userPosition, 0, this.circleSize);
+
+    //Create new world bounded polygon
+    const fogPolygon = this.turfHelper._worldPolygon();
+
+    //Create new circle polygon based on the user's position.
+    const circlePolygon = this.turfHelper._createCirclePolygonFromUserPosition(userPosition, this.circleSize);
+
+    //Combine the fog-polygon and make the circle polygon be a hole.
+    const fogPolygonWithHole = this._addPolygonToFog(fogPolygon, circlePolygon);
+    return fogPolygonWithHole;
+  }
+
+  //Input: TBD
+  //Output: fog-polygon
+  _getFogPolygonFromDB() {
+    const db = new Database()
+    let { trips } = db.GETTrips() //Get data from database. 
+    if (!trips) { return } //If no data is available then skip this function.
+
+    //Create new world bounded polygon
+    let fogPolygon = this.turfHelper._worldPolygon();
+
+    //For each trip.
+    for (let i = 0; i < trips.length; i++) {
+      //This polygon represents a new hole in the fog.
+      let holePolygon = null;
+      //An assumption is that each coordinate is ajecent to the next, otherwise turf.union() wont work.
+      //Result: cooordinates must be written to the database in order, cooordinates must be sent from the database in order.
+      //Potential workaround: sort the coordinates by closest distance from each other. https://www.geodatasource.com/developers/javascript
+
+      //For each coordinate.
+      for (let j = 0; j < trips[i].points.length; j++) {
+
+        let longitude = trips[i].points[j].coordinates[0];
+        let latitude = trips[i].points[j].coordinates[1];
+
+        const circlePolygon = this.turfHelper._createCirclePolygonFromLonLat(longitude, latitude, trips[i].points[j].circleSize)
+
+        if (!holePolygon) { holePolygon = circlePolygon; continue; }
+
+        holePolygon = turf.union(holePolygon, circlePolygon)
+      }
+
+      //Recreate the holes in the fog.
+      fogPolygon = this._addPolygonToFog(fogPolygon, holePolygon);
+    }
+
+    return fogPolygon;
+  }
+
+  //Add new polygon to fog
+  //This function extends the hole in the fog using tuf.union()
+  //Input: 
+  //Output:
+  _addPolygonToFog(fogPolygon, newPolygon) {
+
+    /*
+    The Geojson spec says that:
+    Each array of coordinates inside fog-polygon represents a polygon,
+    the first array of coordinates is shown on the map, in our case it represents fog
+    each subseqent array of coordinates is represted as a hole in the first array of coordinates
+    so we start our for-loop from 1 instead of 0.
+    */
+
+    //For each hole in the fog-polygon.
+    for (let i = 1; i < fogPolygon.geometry.coordinates.length; i++) {
+
+      //An array of coordinates representing a hole in the fog polygon.
+      const holeCoordinates = fogPolygon.geometry.coordinates[i]
+      //Convert the array of coordinates to a polygon object.
+      const holePolygon = turf.polygon([holeCoordinates]);
+
+      //If the "hole" intersects with the new polygon then join them together. (e.g. user moved to edge of fog)
+      if (turf.intersect(holePolygon, newPolygon)) {
+        const newHolePolygon = turf.union(holePolygon, newPolygon);
+        const newHoleCoordinates = newHolePolygon.geometry.coordinates[0];
+
+        //Overwrite the old hole.
+        fogPolygon.geometry.coordinates[i] = newHoleCoordinates;
+        return fogPolygon;
+      }
+    }
+
+    //If none of the "hole" polygons intersect with the new polygon then add a new hole to the fog-polygon.
+    const newHoleCoordinates = newPolygon.geometry.coordinates[0];
+    fogPolygon.geometry.coordinates.push(newHoleCoordinates);
+    return fogPolygon;
+
+  }
+
+}
+
+
+
+// _transformScale(arrayOfFeatures, scale) {
+//   const features = [];
+//   for (let i = 0; i < arrayOfFeatures.length; i++) {
+//     features.push(turf.transformScale(arrayOfFeatures[i], scale));
+//   }
+//   return features;
+// }
+
+class TurfHelper {
+  constructor() {
+  }
+
+  _determineCircleSizeBasedOnElevation(userPosition) {
+    console.log('Altitude: ', userPosition.coords.altitude, 'Altitude Acc: ', userPosition.coords.altitudeAccuracy);
+  }
+
+  //Input: None
+  //Output: Polygon
+  _worldPolygon() {
     return turf.polygon(
       [
         [
@@ -24,174 +214,31 @@ export class TurfWorker {
     );
   }
 
-  getTestData() {
+  //Input: user's position.
+  //Output: Polygon
+  _createCirclePolygonFromUserPosition(userPosition, size = 0.05, steps = 12) {
+    //Firstly a point polygon is required to create a circle using turf.circle()
 
+    //The point polygon is generated using the user's longitude and latitude.
+    const pointPolygon = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
+
+    //A circle polygon is created using the point polygon as its center.
+    const circlePolygon = turf.circle(pointPolygon, size, { steps: steps });
+
+    return circlePolygon;
   }
 
-  circleSize = 0.05; //in kilometers
+  //Input: longitude and latitude.
+  //Output: Polygon
+  _createCirclePolygonFromLonLat(longitude, latitude, size = 0.05, steps = 12) {
+    //Firstly a point polygon is required to create a circle using turf.circle()
 
-  generateNewFog(userPosition) {
-    //Create new world bounded polygon
-    const worldFeature = this.worldPolygon();
+    //The point polygon is generated using longitude and latitude.
+    const pointPolygon = turf.point([longitude, latitude]);
 
-    //Create square polygon based on user's position.
-    const pointPosition = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
-    const circleFeature = turf.circle(pointPosition, this.circleSize, { steps: 12 });
+    //A circle polygon is created using the point polygon as its center.
+    const circlePolygon = turf.circle(pointPolygon, size, { steps: steps });
 
-    //Combine the world and have the square polygon be a "hole".
-    const fogFeature = this._pushCoordinate(worldFeature, circleFeature);
-    return fogFeature;
+    return circlePolygon;
   }
-
-  //Returns a Feature
-  uncoverFog(userPosition, fogFeature) {
-    
-    //Create new square or circle based on user's position.
-    const pointPosition = turf.point([userPosition.coords.longitude, userPosition.coords.latitude]);
-    const circleFeature = turf.circle(pointPosition, this.circleSize, { steps: 12 });
-
-    //Combine the world polygon holes and the square or circle polygon hole.
-    fogFeature = this._pushCoordinate(fogFeature, circleFeature);
-
-    //Test areas
-    fogFeature = this._pushCoordinate(fogFeature, this.testPoly1)
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.1, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.15, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.2, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 90))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 0))
-
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.20, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.30, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.35, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.40, 145))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.45, 145))
-
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.05, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.10, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.15, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.20, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.25, 270))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.28, 200))
-    fogFeature = this._pushCoordinate(fogFeature, turf.transformTranslate(circleFeature, 0.34, 200))
-
-    //Simplify area, reduces points/saves data
-    const options = {tolerance: 0.0001, highQuality: true};
-    fogFeature = turf.simplify(fogFeature, options);
-
-    console.log(fogFeature.geometry.coordinates);
-    return fogFeature;
-  }
-
-  _pushCoordinate(fogFeature, newPolygon) {
-
-    //For each hole in the polygon
-    for (let i = 1; i < fogFeature.geometry.coordinates.length; i++) {
-      
-      const holePolygon = turf.polygon([fogFeature.geometry.coordinates[i]]);
-      //If one of the holes intersect with the new shape then join them together.
-      if (turf.intersect(holePolygon, newPolygon)) {
-        const union = turf.union(holePolygon, newPolygon);
-
-        fogFeature.geometry.coordinates[i] = union.geometry.coordinates[0];
-        return fogFeature;
-      }
-
-    }
-
-    //If none of the polygons intersect with the new shape then add a new hole to the polygon.
-    fogFeature.geometry.coordinates.push(newPolygon.geometry.coordinates[0]);
-    return fogFeature;
-
-  }
-
-  testPoly1 = turf.polygon([
-    [
-      [
-        0.1345152501665723,
-        51.57275440005134
-      ],
-      [
-        0.1345152501665723,
-        51.57116863536726
-      ],
-      [
-        0.13835933510617338,
-        51.57116863536726
-      ],
-      [
-        0.13835933510617338,
-        51.57275440005134
-      ],
-      [
-        0.1345152501665723,
-        51.57275440005134
-      ]
-    ]
-  ])
-
-  test() {
-    let poly1 = turf.polygon([
-      [
-        [
-          0.1345152501665723,
-          51.57275440005134
-        ],
-        [
-          0.1345152501665723,
-          51.57116863536726
-        ],
-        [
-          0.13835933510617338,
-          51.57116863536726
-        ],
-        [
-          0.13835933510617338,
-          51.57275440005134
-        ],
-        [
-          0.1345152501665723,
-          51.57275440005134
-        ]
-      ]
-    ])
-    let poly2 = turf.polygon([
-      [
-        [
-          0.1421694015942876,
-          51.57262754091229
-        ],
-        [
-          0.1421694015942876,
-          51.57108405969663
-        ],
-        [
-          0.14873496259707508,
-          51.57108405969663
-        ],
-        [
-          0.14873496259707508,
-          51.57262754091229
-        ],
-        [
-          0.1421694015942876,
-          51.57262754091229
-        ]
-      ]
-    ])
-
-    console.log(turf.intersect(poly1, poly2));
-
-    console.log(a.geometry.coordinates);
-  }
-
-  // _transformScale(arrayOfFeatures, scale) {
-  //   const features = [];
-  //   for (let i = 0; i < arrayOfFeatures.length; i++) {
-  //     features.push(turf.transformScale(arrayOfFeatures[i], scale));
-  //   }
-  //   return features;
-  // }
 }

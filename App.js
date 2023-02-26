@@ -1,119 +1,51 @@
-import { useEffect, useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
+import 'react-native-gesture-handler';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 
-import MapView from "react-native-maps";
-import { TurfWorker } from "./turf";
-import { Locator } from "./Locator";
+const Stack = createStackNavigator();
+import signIn from './signIn.js'
+import home from './home.js'
+import profile from './profile.js'
 
-export default function App() {
-  const [location, setLocation] = useState(null);
-  const [locationErrorMessage, setLocationErrorMessage] = useState(null);
-  const [revealedFog, setRevealedFog] = useState(null);
+const theme = {
+  ...MD3LightTheme, // or MD3DarkTheme
+  roundness: 2,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: '#3498db',
+    secondary: '#f1c40f',
+    tertiary: '#a1b2c3',
+  },
+};
 
-  const locator = new Locator();
-  const turfWorker = new TurfWorker();
-
-  useEffect(() => {
-    locator.requestLocationPermissions()
-      .catch((err) => {
-        setLocationErrorMessage(err);
-      })
-
-    locator.getCurrentPositionAsync()
-      .then((newLocation) => {
-
-        console.log(newLocation, '<-- newLocation');
-        setLocation(newLocation);
-
-        const revealedFog = turfWorker.generateNewFog(newLocation);
-        const revealedFog2 = turfWorker.uncoverFog(newLocation, revealedFog);
-
-        setRevealedFog(revealedFog2);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-
-
-      //Get DATA from DB here,
-      //If no previous data is available then generate new fog.
-
-      //Uncover the fog of a new location when the user's position changes.
-
-  }, [])
-
-
-
-  
-  if (locationErrorMessage) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.paragraph}>{errorMsg}</Text>
-      </View>
-    );
-  }
-
-  if (!location) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.paragraph}>Loading location...{location}</Text>
-      </View>
-    );
-  }
-
-  if (location) {
-    return (
-      <View style={styles.container}>
-
-        {/* For debugging only, print the state with a button */}
-        <Pressable style={styles.button} onPress={printState}>
-          <Text style={styles.text}>Print React state</Text>
-        </Pressable>
-
-        <Text>Open up App.js to start working on your app! A Change.</Text>
-        <MapView
-          initialRegion={{
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          showsUserLocation={true}
-          mapPadding={{
-            top: 30,
-          }}
-        >
-
-          {
-            revealedFog ?
-              <Geojson
-                geojson={{
-                  features: [revealedFog]
-                }}
-                fillColor='rgba(0, 156, 0, 0.5)'
-                strokeColor="green"
-                strokeWidth={4}
-              >
-                
-              </Geojson>
-              : null
-          }
-
-
-        </MapView>
-        <StatusBar style="auto" />
-      </View>
-    );
-  }
-
-  function printState() {
-    console.log(revealedFog, '<-- revealedCoords')
-  }
+// class App extends React.Component {
+//   render() {
+const App = () => {
+  return (
+    <PaperProvider theme={theme}>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={home}
+          />
+          <Stack.Screen
+            name="SignIn"
+            component={signIn}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={profile}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
+  );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -122,8 +54,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   map: {
-    width: "100%",
-    height: "100%",
+    width: "90%",
+    height: "90%",
   },
   button: {
     alignItems: 'center',
@@ -134,6 +66,15 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: 'black',
   },
+  navButton: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '20%',
+    left: '75%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
+  },
   text: {
     fontSize: 16,
     lineHeight: 21,
@@ -142,3 +83,38 @@ const styles = StyleSheet.create({
     color: 'white',
   }
 });
+
+export default App;
+
+
+
+////import 'react-native-gesture-handler';
+//import * as React from 'react';
+//import { StyleSheet } from 'react-native';
+//import {NavigationContainer} from '@react-navigation/native';
+//import {createNativeStackNavigator} from '@react-navigation/native-stack'
+//
+////import mapHome from './mapHome.js';
+//import signIn from './signIn.js'
+//import home from './home.js'
+//
+//const Stack = createNativeStackNavigator();
+//
+//class App extends React.Component {
+//  render() {
+//
+//    return (
+//      <NavigationContainer>
+//        <Stack.Navigator>
+//          <Stack.Screen
+//            name="Home"
+//            component={home}
+//          />
+//          <Stack.Screen
+//            name="SignIn"
+//            component={signIn}
+//          />
+//        </Stack.Navigator>
+//      </NavigationContainer>
+//    );
+//}
