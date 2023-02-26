@@ -1,6 +1,8 @@
 import axios from "axios"
+import { Database } from "./MOCK DATABASE";
 
 class API {
+
     password = ''
     username = ''
     constructor(username, password) {
@@ -14,13 +16,20 @@ class API {
     });
     //Our API's
     getFogData = (user_id) => {
-        return axios.get(`/trips/${user_id}`)
-            .then((response) => {
-                if (!response.status === 200) {
-                    throw new Error("Error: " + response.status);
-                }
-                return response.data; //Returns data in the formatted way.
-            })
+        // return axios.get(`/trips/${user_id}`)
+        //     .then((response) => {
+        //         if (!response.status === 200) {
+        //             throw new Error("Error: " + response.status);
+        //         }
+        //         return response.data; //Returns data in the formatted way.
+        //     })
+
+        //----------------------------------------Change to get from API---------------------------------------------------
+        const db = new Database()
+        let fogData = db.GETFogData() //Get data from database. 
+        if (!fogData) { return } //If no data is available then skip this function.
+        return Promise.resolve(fogData);
+        //-----------------------------------------------------------------------------------------------------------------
     }
 
     postFogData = (partialFogData) => {
@@ -28,14 +37,16 @@ class API {
             data: partialFogData
         })
             .then((response) => {
+                //Fog data successfully saved.
                 if (!response.status === 201) {
-                    //Fog data successfully saved.
+                    throw new Error("Error: " + response.status + response.statusText);
                 }
+                return response.data; //Returns success message?
             })
     }
 
     getUser = () => {
-        return axios.get(`/users/${username}`)
+        return axios.get(`/users/${this.username}`)
             .then((response) => {
                 if (!response.status === 200) {
                     throw new Error("Error: " + response.status + response.statusText);
@@ -62,7 +73,7 @@ class API {
     }
 
     deleteFog = (username) => {
-        //Action cannot be reversed
+        //Action cannot be reversed. Deletes all trips.
         axios.delete(`/user/${username}`, {})
     }
 

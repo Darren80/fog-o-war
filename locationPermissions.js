@@ -14,6 +14,7 @@ export function requestPermissions() {
         }
         if (data) {
             const { locations } = data;
+            //TODO: Track location even when app is in the background.
             // do something with the locations captured in the background
         }
     });

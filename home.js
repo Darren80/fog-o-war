@@ -5,22 +5,23 @@ import * as Location from "expo-location";
 import * as TaskManager from 'expo-task-manager';
 
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
-import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson, Marker } from "react-native-maps";
+import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
-import { IconButton, MD3Colors, Avatar } from 'react-native-paper'
+import { IconButton, MD3Colors, Avatar, Button } from 'react-native-paper'
 
 import ImageAdder from "./ImageAdder";
 
-
 import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
-import API from "./models/model-apis";
+import API from "./APIs";
+const api = new API();
 
 
-
-const turfWorker = new TurfWorker();
 function home({ navigation }) {
   const [username, setUsername] = useState(null);
+  const [userID, setUserID] = useState('test123');
+  const turfWorker = new TurfWorker(userID);
+
 
   const [currentUserPosition, setCurrentUserPosition] = useState(null);
 
@@ -30,56 +31,71 @@ function home({ navigation }) {
 
   const [loggedIn, setLoggedIn] = useState(false);
 
+  //Markers
   const [markers, setMarkers] = useState([]);
   const [clickMarker, setClickMarker] = useState(false);
   const [imageAdded, setImageAdded] = useState(false);
   const [pointsWithingPolygon, setPointsWithinPolygon] = useState(false);
 
-  //Markers
+  //Data to send via /trips/:trip_id
+  const [partialFogData, setPartialFogData] = useState(null);
 
-
+  //Runs once at the start of the program.
   useEffect(() => {
-    //Create new user
-    const api = new API('bobby', 'password');
-    api.postNewUser()
-      .then((username) => { setUsername(username); console.log(username); })
-      .catch((error) => {
-        console.error(error);
-      })
+    //TODO: Make a MODAL to explain to the user why background permission is required.
 
-    //TODO: Decide how often the points data should be written to the database
-    //TODO: Make a modal to explain to the user why background permission is required.
-
+    //Request both background and foreground location permissions.
     requestPermissions()
       .catch((err) => {
         setLocationErrorMessage(err);
       })
 
-    //Will run when location changes while app is in the foreground
-    Location.watchPositionAsync({
-      accuracy: Location.Accuracy.Highest,
-      distanceInterval: 20,
-    }, (newUserLocation) => {
-      setCurrentUserPosition(newUserLocation);
-    });
+    // GET trips from DB.
+    api.getFogData(userID)
+      .then((fogData) => {
+        const newFogPolygon = turfWorker.rebuildFogPolygonFromFogData(fogData)
+        setFogPolygon(newFogPolygon);
+      })
+      .catch(() => {
+        const newFogPolygon = turfWorker.generateNewFogPolygon();
+        setFogPolygon(newFogPolygon);
+      })
+      .finally(() => {
+        //Will change current position when location changes while app is in the foreground.
+        Location.watchPositionAsync({
+          accuracy: Location.Accuracy.Highest,
+          distanceInterval: 20,
+        }, (newUserLocation) => {
+          setCurrentUserPosition(newUserLocation);
+        });
+      })
 
   }, [])
 
+  //Runs every time the user's current location changes.
   useEffect(() => {
-    if (!fogPolygon) {
-      const newFogPolygon = turfWorker.getFog(currentUserPosition);
-      setFogPolygon(newFogPolygon);
-      return;
-    }
+    if (!currentUserPosition) { return }
 
-    const newFogPolygon = turfWorker.uncoverFog(currentUserPosition, fogPolygon);
+    //Uncover new area in fog
+    const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(currentUserPosition, fogPolygon, partialFogData);
     setFogPolygon(newFogPolygon);
+    //Object to be saved in localstorage for later sending to db.
+    setPartialFogData(newPartialFogData);
+
+    console.log(newPartialFogData, '<-- parital fog data to save to local storage, then send to db after x time');
+
+
+    //TODO: Write fog data to local storage. ------------------------------------------
+
+    //TODO: Write fog data to database after set amount of time e.g. every minute. ---------------------------------------------
+    //TODO: Reset fog data in local storage after database 200 OK. ---------------------------------------------
+
   }, [currentUserPosition])
 
   const markerPositionSelected = (e) => {
     const markerPosition = e.nativeEvent.coordinate;
 
-    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, revealedFog);
+    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, fogPolygon);
 
     if (checkUserWithinPolygon) {
       setPointsWithinPolygon(true);
@@ -105,27 +121,28 @@ function home({ navigation }) {
     );
   }
 
-  const PermissionsButton = () => (
+  //TODO: Move this button to the profile page.
+  const ResetFogButton = () => (
     <View style={styles.container}>
-      <Button onPress={requestPermissions} title="Enable background location" />
+      <Button onPress={requestPermissions} compact={true}>
+        {'Reset fog - Irreversible'}
+      </Button>
     </View>
   );
 
-  function printState() {
-    const newFogPolygon = turfWorker.getFog(currentUserPosition);
-    setFogPolygon(newFogPolygon);
-  }
+  //TODO: Put button at bottom of map.
+  const ElevationButton = () => (
+    <View style={styles.container}>
+      <Button onPress={requestPermissions} compact={true}>
+        Reveal fog based on elevation
+      </Button>
+    </View>
+  );
 
   if (currentUserPosition) {
     return (
       <View style={styles.container}>
         <Text>Fog-Of-War</Text>
-
-        {/* For debugging only, print the state with a button */}
-        <Pressable style={styles.button} onPress={printState}>
-          <Text style={styles.text}>Reset fog</Text>
-        </Pressable>
-
         <MapView
           initialRegion={{
             latitude: currentUserPosition.coords.latitude,
@@ -178,6 +195,8 @@ function home({ navigation }) {
               : null
           }
         </MapView>
+
+        <ElevationButton/>
 
         <View style={styles.navButton}>
           <IconButton
