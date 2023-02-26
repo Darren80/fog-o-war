@@ -24,35 +24,64 @@ const theme = {
 // class App extends React.Component {
 //   render() {
 const App = () => {
-    return (
-        <PaperProvider theme={theme}>
-          <NavigationContainer>
-            <Stack.Navigator>
-              <Stack.Screen
-                name="Home"
-                component={home}
-              />
-              <Stack.Screen
-                name="SignIn"
-                component={signIn}
-              />
-              <Stack.Screen
-                name="Profile"
-                component={profile}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </PaperProvider>
-        );
+  return (
+    <PaperProvider theme={theme}>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={home}
+          />
+          <Stack.Screen
+            name="SignIn"
+            component={signIn}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={profile}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  map: {
+    width: "90%",
+    height: "90%",
+  },
+  button: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: 'black',
   },
+  navButton: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '20%',
+    left: '75%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
+  },
+  text: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: 'white',
+  }
 });
 
 export default App;

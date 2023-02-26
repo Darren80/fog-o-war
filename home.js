@@ -1,70 +1,64 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+
 import { StatusBar } from "expo-status-bar";
+import * as Location from "expo-location";
+import * as TaskManager from 'expo-task-manager';
+
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
-import { IconButton , MD3Colors, Avatar } from 'react-native-paper'
 import MapView from "react-native-maps";
+import { IconButton, MD3Colors, Avatar } from 'react-native-paper'
+
+
+import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
-import { Locator } from "./Locator";
+import API from "./models/model-apis";
 
-import * as Location from "expo-location";
 
-const home = ({navigation}) => {
-  const [previousUserPosition, setpreviousUserPosition] = useState(null);
+
+const turfWorker = new TurfWorker();
+function home() {
+  const [username, setUsername] = useState(null);
+
   const [currentUserPosition, setCurrentUserPosition] = useState(null);
-  const [loggedIn, setLoggedIn] = useState(true)
+
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
 
-  const [username, setUsername] = useState(null);
   const [fogPolygon, setFogPolygon] = useState(null);
 
-  const turfWorker = new TurfWorker();
+  const [loggedIn, setLoggedIn] = useState(true);
 
   useEffect(() => {
-
-    //Save fog data to DB every minute
-
-    Location.requestForegroundPermissionsAsync()
-      .then(({ status }) => {
-
-        if (status !== "granted") {
-          console.log("Permission to access location was denied");
-          throw new Error("Permission to access location was denied");
-        }
-
+    //Create new user
+    const api = new API('bobby', 'password');
+    api.postNewUser()
+      .then((username) => { setUsername(username); console.log(username); })
+      .catch((error) => {
+        console.error(error);
       })
+
+    //TODO: Decide how often the points data should be written to the database
+    //TODO: Make a modal to explain to the user why background permission is required.
+
+    requestPermissions()
       .catch((err) => {
         setLocationErrorMessage(err);
       })
 
-    //ToDo: Make a modal to explain to the user why background permission is required.
-    Location.requestBackgroundPermissionsAsync()
-      .then(({ status }) => {
-
-      });
-
+    //Will run when location changes while app is in the foreground
     Location.watchPositionAsync({
-      accuracy: Location.Accuracy.High,
-      distanceInterval: 10,
+      accuracy: Location.Accuracy.Highest,
+      distanceInterval: 20,
     }, (newUserLocation) => {
       setCurrentUserPosition(newUserLocation);
-      // console.log(newUserLocation, '<-- newLocation');
-      // console.log(!fogPolygon, '<-- !fogPolygon true/false', fogPolygon, '<-- fogPolygon');
     });
 
-    //Get DATA from DB here,
-    //If no previous data is available then generate new fog.
-
-    //Uncover the fog of a new location when the user's position changes.
-
-
-    const newFogPolygon = turfWorker.getFog(currentUserPosition);
-    setFogPolygon(newFogPolygon);
   }, [])
 
   useEffect(() => {
-    console.log(fogPolygon);
     if (!fogPolygon) {
+      const newFogPolygon = turfWorker.getFog(currentUserPosition);
+      setFogPolygon(newFogPolygon);
       return;
     }
 
@@ -89,15 +83,25 @@ const home = ({navigation}) => {
     );
   }
 
+  const PermissionsButton = () => (
+    <View style={styles.container}>
+      <Button onPress={requestPermissions} title="Enable background location" />
+    </View>
+  );
+
+  function printState() {
+    const newFogPolygon = turfWorker.getFog(currentUserPosition);
+    setFogPolygon(newFogPolygon);
+  }
+
   if (currentUserPosition) {
     return (
       <View style={styles.container}>
 
         {/* For debugging only, print the state with a button */}
         <Pressable style={styles.button} onPress={printState}>
-          <Text style={styles.text}>Print React state</Text>
+          <Text style={styles.text}>Reset fog</Text>
         </Pressable>
-
 
         <MapView
           initialRegion={{
@@ -132,72 +136,57 @@ const home = ({navigation}) => {
 
         </MapView>
         <View style={styles.navButton}>
-             <IconButton
-             icon='account'
-             iconColor={MD3Colors.error50}
-             style={styles.navButton}
-             size={40}
-             onPress={()=> loggedIn? navigation.navigate('Profile') : navigation.navigate('SignIn')}
-             />
-            {/* <Avatar.Image size={24} source={'https://www.google.com/search?q=dog&rlz=1C1CHBF_en-GBGB991GB991&sxsrf=AJOqlzUbfns4rj4KgJIHlZgFvX__FUTesA:1677347401935&tbm=isch&source=iu&ictx=1&vet=1&fir=NN1-QGCky_XgzM%252CvL0suvKfyYaqHM%252C%252Fm%252F0bt9lr%253BOyQGKst6Lara3M%252CDj243kHCP9nJ-M%252C_%253BeQsdEWaZ6MHrQM%252C2prjuOFdTo6X8M%252C_%253BGbsqgMoKCwHzMM%252C65_J7MmDboKEcM%252C_%253BLdkDcR8aYOxQXM%252CsmcHwKUZvdWsaM%252C_&usg=AI4_-kQerRqCtAwxi4UQGOMadH6_xZ-OOQ&sa=X&ved=2ahUKEwjjqLqAnrH9AhWVFcAKHRx_BwYQ_B16BAh8EAE#imgrc=NN1-QGCky_XgzM'}/>
-             :
-             <IconButton
-                iconColor={MD3Colors.error50}
-                size={40}
-                //onPress={()=> loggedIn? navigation.navigate('Profile') : navigation.navigate('SignIn')}
-                onPress={()=> navigation.navigate('SignIn')}
-                />  */}
+          <IconButton
+            icon='account'
+            iconColor={MD3Colors.error50}
+            style={styles.navButton}
+            size={40}
+            onPress={() => loggedIn ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+          />
+          <StatusBar style="auto" />
         </View>
-        <StatusBar style="auto" />
       </View>
     );
   }
-
-
-
-  function printState() {
-    console.log(fogPolygon, '<-- revealedCoords')
-  }
-
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  map: {
-    width: "90%",
-    height: "90%",
-  },
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 4,
-    elevation: 3,
-    backgroundColor: 'black',
-  },
-  navButton: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-    top: '20%',
-    left: '75%',
-    alignSelf: 'flex-end',
-    paddingHorizontal:0
-  },
-  text: {
-    fontSize: 16,
-    lineHeight: 21,
-    fontWeight: 'bold',
-    letterSpacing: 0.25,
-    color: 'white',
-  }
-});
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    map: {
+      width: "90%",
+      height: "90%",
+    },
+    button: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 4,
+      elevation: 3,
+      backgroundColor: 'black',
+    },
+    navButton: {
+      position: 'absolute',
+      alignItems: 'center',
+      justifyContent: 'center',
+      top: '20%',
+      left: '75%',
+      alignSelf: 'flex-end',
+      paddingHorizontal: 0
+    },
+    text: {
+      fontSize: 16,
+      lineHeight: 21,
+      fontWeight: 'bold',
+      letterSpacing: 0.25,
+      color: 'white',
+    }
+  })
 
 
-export default home;
-
+  export default home;
