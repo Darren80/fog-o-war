@@ -3,16 +3,29 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 
 const Stack = createStackNavigator();
 import signIn from './signIn.js'
 import home from './home.js'
 import profile from './profile.js'
 
-class App extends React.Component {
-  render() {
+const theme = {
+  ...MD3LightTheme, // or MD3DarkTheme
+  roundness: 2,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: '#3498db',
+    secondary: '#f1c40f',
+    tertiary: '#a1b2c3',
+  },
+};
 
+// class App extends React.Component {
+//   render() {
+const App = () => {
     return (
+        <PaperProvider theme={theme}>
           <NavigationContainer>
             <Stack.Navigator>
               <Stack.Screen
@@ -29,8 +42,8 @@ class App extends React.Component {
               />
             </Stack.Navigator>
           </NavigationContainer>
+        </PaperProvider>
         );
-  }
 }
 
 const styles = StyleSheet.create({
