@@ -1,144 +1,51 @@
-import { useEffect, useState } from "react";
+import 'react-native-gesture-handler';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 
-import { StatusBar } from "expo-status-bar";
-import * as Location from "expo-location";
-import * as TaskManager from 'expo-task-manager';
+const Stack = createStackNavigator();
+import signIn from './signIn.js'
+import home from './home.js'
+import profile from './profile.js'
 
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
-import MapView from "react-native-maps";
+const theme = {
+  ...MD3LightTheme, // or MD3DarkTheme
+  roundness: 2,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: '#3498db',
+    secondary: '#f1c40f',
+    tertiary: '#a1b2c3',
+  },
+};
 
-
-import { requestPermissions } from "./locationPermissions";
-import { TurfWorker } from "./turf";
-import API from "./models/model-apis";
-
-
-
-const turfWorker = new TurfWorker();
-export default function App() {
-  const [username, setUsername] = useState(null);
-
-  const [currentUserPosition, setCurrentUserPosition] = useState(null);
-
-  const [locationErrorMessage, setLocationErrorMessage] = useState(null);
-
-  const [fogPolygon, setFogPolygon] = useState(null);
-
-  useEffect(() => {
-    //Create new user
-    const api = new API('bobby', 'password');
-    api.postNewUser()
-    .then((username) => { setUsername(username); console.log(username); })
-    .catch((error) => {
-      console.error(error);
-    })
-
-    //TODO: Decide how often the points data should be written to the database
-    //TODO: Make a modal to explain to the user why background permission is required.
-
-    requestPermissions()
-    .catch((err) => {
-      setLocationErrorMessage(err);
-    })
-
-    //Will run when location changes while app is in the foreground
-    Location.watchPositionAsync({
-      accuracy: Location.Accuracy.Highest,
-      distanceInterval: 20,
-    }, (newUserLocation) => {
-      setCurrentUserPosition(newUserLocation);
-    });
-
-  }, [])
-
-  useEffect(() => {
-    if (!fogPolygon) {
-      const newFogPolygon = turfWorker.getFog(currentUserPosition);
-      setFogPolygon(newFogPolygon);
-      return;
-    }
-
-    const newFogPolygon = turfWorker.uncoverFog(currentUserPosition, fogPolygon);
-    setFogPolygon(newFogPolygon);
-  }, [currentUserPosition])
-
-
-  if (locationErrorMessage) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.paragraph}>{errorMsg}</Text>
-      </View>
-    );
-  }
-
-  if (!currentUserPosition) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.paragraph}>Loading location...{currentUserPosition}</Text>
-      </View>
-    );
-  }
-
-  const PermissionsButton = () => (
-    <View style={styles.container}>
-      <Button onPress={requestPermissions} title="Enable background location" />
-    </View>
+// class App extends React.Component {
+//   render() {
+const App = () => {
+  return (
+    <PaperProvider theme={theme}>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={home}
+          />
+          <Stack.Screen
+            name="SignIn"
+            component={signIn}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={profile}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </PaperProvider>
   );
-
-  function printState() {
-    const newFogPolygon = turfWorker.getFog(currentUserPosition);
-    setFogPolygon(newFogPolygon);
-  }
-
-  if (currentUserPosition) {
-    return (
-      <View style={styles.container}>
-
-        {/* For debugging only, print the state with a button */}
-        <Pressable style={styles.button} onPress={printState}>
-          <Text style={styles.text}>Reset fog</Text>
-        </Pressable>
-
-        <MapView
-          initialRegion={{
-            latitude: currentUserPosition.coords.latitude,
-            longitude: currentUserPosition.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          showsUserLocation={true}
-          mapPadding={{
-            top: 30,
-          }}
-        >
-
-          {
-            fogPolygon ?
-              <Geojson
-                geojson={{
-                  features: [fogPolygon]
-                }}
-                fillColor='rgba(0, 156, 0, 0.5)'
-                strokeColor="green"
-                strokeWidth={4}
-              >
-
-              </Geojson>
-              : null
-          }
-
-
-        </MapView>
-        <StatusBar style="auto" />
-      </View>
-    );
-  }
-
-
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -159,6 +66,15 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: 'black',
   },
+  navButton: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '20%',
+    left: '75%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
+  },
   text: {
     fontSize: 16,
     lineHeight: 21,
@@ -167,3 +83,38 @@ const styles = StyleSheet.create({
     color: 'white',
   }
 });
+
+export default App;
+
+
+
+////import 'react-native-gesture-handler';
+//import * as React from 'react';
+//import { StyleSheet } from 'react-native';
+//import {NavigationContainer} from '@react-navigation/native';
+//import {createNativeStackNavigator} from '@react-navigation/native-stack'
+//
+////import mapHome from './mapHome.js';
+//import signIn from './signIn.js'
+//import home from './home.js'
+//
+//const Stack = createNativeStackNavigator();
+//
+//class App extends React.Component {
+//  render() {
+//
+//    return (
+//      <NavigationContainer>
+//        <Stack.Navigator>
+//          <Stack.Screen
+//            name="Home"
+//            component={home}
+//          />
+//          <Stack.Screen
+//            name="SignIn"
+//            component={signIn}
+//          />
+//        </Stack.Navigator>
+//      </NavigationContainer>
+//    );
+//}
