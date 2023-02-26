@@ -4,10 +4,12 @@ import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 import * as TaskManager from 'expo-task-manager';
 
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson } from "react-native-maps";
+import { Pressable, StyleSheet, Text, View, Image } from "react-native";
+import { PROVIDER_GOOGLE, Polyline, Polygon, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
 import { IconButton, MD3Colors, Avatar } from 'react-native-paper'
+
+import ImageAdder from "./ImageAdder";
 
 
 import { requestPermissions } from "./locationPermissions";
@@ -27,6 +29,14 @@ function home({ navigation }) {
   const [fogPolygon, setFogPolygon] = useState(null);
 
   const [loggedIn, setLoggedIn] = useState(false);
+
+  const [markers, setMarkers] = useState([]);
+  const [clickMarker, setClickMarker] = useState(false);
+  const [imageAdded, setImageAdded] = useState(false);
+  const [pointsWithingPolygon, setPointsWithinPolygon] = useState(false);
+
+  //Markers
+
 
   useEffect(() => {
     //Create new user
@@ -66,6 +76,18 @@ function home({ navigation }) {
     setFogPolygon(newFogPolygon);
   }, [currentUserPosition])
 
+  const markerPositionSelected = (e) => {
+    const markerPosition = e.nativeEvent.coordinate;
+
+    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, revealedFog);
+
+    if (checkUserWithinPolygon) {
+      setPointsWithinPolygon(true);
+      setMarkers([...markers, {
+        coords: markerPosition
+      }]);
+    }
+  }
 
   if (locationErrorMessage) {
     return (
@@ -97,6 +119,7 @@ function home({ navigation }) {
   if (currentUserPosition) {
     return (
       <View style={styles.container}>
+        <Text>Fog-Of-War</Text>
 
         {/* For debugging only, print the state with a button */}
         <Pressable style={styles.button} onPress={printState}>
@@ -116,7 +139,29 @@ function home({ navigation }) {
           mapPadding={{
             top: 30,
           }}
+          onPress={(e) => markerPositionSelected(e)}
         >
+
+          {
+            pointsWithingPolygon ?
+              (
+                markers.map((marker, i) => (
+                  <Marker
+                    coordinate={marker.coords}
+                    key={i}
+                    onPress={() => {
+                      setClickMarker(current => !current);
+                      setImageAdded(current => !current);
+                    }}>
+                    {
+                      imageAdded ?
+                        <Image source={{ uri: marker.image }} style={{ width: 30, height: 30 }} />
+                        : null
+                    }
+                  </Marker>
+                ))
+              ) : null
+          }
 
           {
             fogPolygon ?
@@ -132,9 +177,8 @@ function home({ navigation }) {
               </Geojson>
               : null
           }
-
-
         </MapView>
+
         <View style={styles.navButton}>
           <IconButton
             icon='account'
@@ -145,48 +189,55 @@ function home({ navigation }) {
           />
           <StatusBar style="auto" />
         </View>
+
+        {
+          clickMarker ?
+            <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} /> : null
+        }
       </View>
     );
   }
 }
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    map: {
-      width: "90%",
-      height: "90%",
-    },
-    button: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 32,
-      borderRadius: 4,
-      elevation: 3,
-      backgroundColor: 'black',
-    },
-    navButton: {
-      position: 'absolute',
-      alignItems: 'center',
-      justifyContent: 'center',
-      top: '20%',
-      left: '75%',
-      alignSelf: 'flex-end',
-      paddingHorizontal: 0
-    },
-    text: {
-      fontSize: 16,
-      lineHeight: 21,
-      fontWeight: 'bold',
-      letterSpacing: 0.25,
-      color: 'white',
-    }
-  })
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  map: {
+    width: "90%",
+    height: "90%",
+  },
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: 'black',
+  },
+  navButton: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '20%',
+    left: '75%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
+  },
+  text: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: 'white',
+    width: "88%",
+    height: "88%"
+  }
+})
 
 
-  export default home;
+export default home;
