@@ -125,7 +125,7 @@ function home({ navigation }) {
   const ResetFogButton = () => (
     <View style={styles.container}>
       <Button onPress={requestPermissions} compact={true}>
-        {'Reset fog - Irreversible'}
+        Reset fog - Irreversible
       </Button>
     </View>
   );
