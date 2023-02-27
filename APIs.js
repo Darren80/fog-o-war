@@ -1,6 +1,6 @@
 import axios from "axios"
 import { Database } from "./MOCK DATABASE";
-
+const googleMapAPIKey = 'AIzaSyACUp2e0eMW5lbJIGx3CxmncPEv7ub99EM'
 class API {
 
     password = ''
@@ -85,9 +85,23 @@ class API {
 
     }
 
-    //External API's
-    getElevation = () => {
+    deleteMarker = () => {
 
+    }
+
+    deleteAllMarkers = () => {
+
+    }
+
+    //External API's
+    getElevation = (latitude = 39.7391536, longitude = -104.9847034) => {
+        return axios.get(`https://maps.googleapis.com/maps/api/elevation/json?locations=${latitude}%2C${longitude}&key=${googleMapAPIKey}`)
+            .then(function (response) {
+                return response.data;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     }
 }
 

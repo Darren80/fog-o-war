@@ -14,6 +14,7 @@ import ImageAdder from "./ImageAdder";
 import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
 import API from "./APIs";
+import { LocationAccuracy } from "expo-location";
 const api = new API();
 
 
@@ -23,13 +24,13 @@ function home({ navigation }) {
   const turfWorker = new TurfWorker(userID);
 
 
-  const [currentUserPosition, setCurrentUserPosition] = useState(null);
+  const [currentUserLocation, setCurrentUserLocation] = useState(null);
 
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
 
   const [fogPolygon, setFogPolygon] = useState(null);
 
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -66,7 +67,7 @@ function home({ navigation }) {
           accuracy: Location.Accuracy.Highest,
           distanceInterval: 20,
         }, (newUserLocation) => {
-          setCurrentUserPosition(newUserLocation);
+          setCurrentUserLocation(newUserLocation);
         });
       })
 
@@ -74,15 +75,12 @@ function home({ navigation }) {
 
   //Runs every time the user's current location changes.
   useEffect(() => {
-    if (!currentUserPosition) { return }
+    if (!currentUserLocation) { return }
 
-    //Uncover new area in fog
-    const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(currentUserPosition, fogPolygon, partialFogData);
-    setFogPolygon(newFogPolygon);
-    //Object to be saved in localstorage for later sending to db.
-    setPartialFogData(newPartialFogData);
+    uncoverFog();
 
-    console.log(newPartialFogData, '<-- parital fog data to save to local storage, then send to db after x time');
+    // console.log(newPartialFogData, '<-- parital fog data to save to local storage, then send to db after x time');
+
 
 
     //TODO: Write fog data to local storage. ------------------------------------------
@@ -90,7 +88,25 @@ function home({ navigation }) {
     //TODO: Write fog data to database after set amount of time e.g. every minute. ---------------------------------------------
     //TODO: Reset fog data in local storage after database 200 OK. ---------------------------------------------
 
-  }, [currentUserPosition])
+  }, [currentUserLocation])
+
+  const uncoverFog = (userHeightAboveGround) => {
+    if (userHeightAboveGround) {
+      //expand the circle more when the user is higher up.
+      const circleMultiplyer = Math.ceil(userHeightAboveGround / 5);
+      turfWorker.circleSize = turfWorker.circleSize * circleMultiplyer;
+    }
+
+    //Check overlapping
+    
+
+    //Uncover new area in fog
+    const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(currentUserLocation, fogPolygon, partialFogData);
+    const newFogPolygon2 = turfWorker.fixFog(newFogPolygon);
+    setFogPolygon(newFogPolygon2);
+    //Object to be saved in localstorage for later sending to db.
+    setPartialFogData(newPartialFogData);
+  }
 
   const markerPositionSelected = (e) => {
     const markerPosition = e.nativeEvent.coordinate;
@@ -105,6 +121,41 @@ function home({ navigation }) {
     }
   }
 
+  const getCurrentElevation = () => {
+
+    //Get current elevation according to GPS.
+    Location.getCurrentPositionAsync({
+      accuracy: LocationAccuracy.BestForNavigation
+    })
+      .then((newUserLocation) => {
+        const currentLatitude = newUserLocation.coords.latitude;
+        const currentLongitude = newUserLocation.coords.longitude;
+
+        setCurrentUserLocation(newUserLocation);
+
+        return Promise.all([api.getElevation(currentLatitude, currentLongitude), newUserLocation])
+      })
+      .then((data) => {
+        const elevationResponse = data[0];
+        const newUserLocation = data[1];
+
+        const currentAltitude = newUserLocation.coords.altitude;
+        const currentAltitudeAccuracy = newUserLocation.coords.altitudeAccuracy;
+
+        const userHeightAboveGround = currentAltitude - elevationResponse.results[0].elevation;
+
+        console.log('accuracy: ', currentAltitudeAccuracy, 'm');
+        console.log('user height above ground sea level: ', currentAltitude, 'm');
+        console.log('height of ground above sea level: ', elevationResponse.results[0].elevation, 'm');
+        console.log('user is ', userHeightAboveGround, 'm above ground level.');
+
+        if (userHeightAboveGround >= 0) {
+          uncoverFog(userHeightAboveGround);
+        }
+      })
+
+  }
+
   if (locationErrorMessage) {
     return (
       <View style={styles.container}>
@@ -113,10 +164,10 @@ function home({ navigation }) {
     );
   }
 
-  if (!currentUserPosition) {
+  if (!currentUserLocation) {
     return (
       <View style={styles.container}>
-        <Text style={styles.paragraph}>Loading location...{currentUserPosition}</Text>
+        <Text style={styles.paragraph}>Loading location...{currentUserLocation}</Text>
       </View>
     );
   }
@@ -133,20 +184,20 @@ function home({ navigation }) {
   //TODO: Put button at bottom of map.
   const ElevationButton = () => (
     <View style={styles.container}>
-      <Button onPress={requestPermissions} compact={true}>
+      <Button onPress={getCurrentElevation} compact={true}>
         Reveal fog based on elevation
       </Button>
     </View>
   );
 
-  if (currentUserPosition) {
+  if (currentUserLocation) {
     return (
       <View style={styles.container}>
         <Text>Fog-Of-War</Text>
         <MapView
           initialRegion={{
-            latitude: currentUserPosition.coords.latitude,
-            longitude: currentUserPosition.coords.longitude,
+            latitude: currentUserLocation.coords.latitude,
+            longitude: currentUserLocation.coords.longitude,
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
@@ -186,8 +237,8 @@ function home({ navigation }) {
                 geojson={{
                   features: [fogPolygon]
                 }}
-                fillColor='rgba(0, 156, 0, 0.5)'
-                strokeColor="green"
+                fillColor='rgba(118,	119,	121	, 0.85)'
+                strokeColor="rgba(218, 223, 225, 1)"
                 strokeWidth={4}
               >
 
@@ -196,7 +247,7 @@ function home({ navigation }) {
           }
         </MapView>
 
-        <ElevationButton/>
+        <ElevationButton />
 
         <View style={styles.navButton}>
           <IconButton

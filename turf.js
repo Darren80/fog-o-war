@@ -14,16 +14,13 @@ export class TurfWorker {
   //Uncovers the fog based on the user's current position
   //Input:
   //Output:
-  uncoverFog(userPosition, fogPolygon, partialFogData) {
+  uncoverFog(userPosition, fogPolygon, partialFogData, circleMultiplyer = 1) {
 
     //TODO: block the uncovering of fog if the user's speed exceeds walking or cycling speed.
     if (userPosition.coords.speed > 7.15264) { //If the user's speed is above or equal to 16Mp/h or 7.15264m/s
       //Create a MODAL to the user telling them their speed is too high to track their progress.
       console.log('Speed exceeds maximum!');
     }
-
-    //TODO: calculate the user's elevation above the ground, expand the circle more when the user is higher up.
-    this.turfHelper._determineCircleSizeBasedOnElevation(userPosition);
 
     //Create new circle polygon based on the user's position.
     const circlePolygon = this.turfHelper._createCirclePolygonFromUserPosition(userPosition, this.circleSize);
@@ -206,6 +203,35 @@ export class TurfWorker {
 
   }
 
+  fixFog(fogPolygon) {
+    //For each hole in the fog-polygon from 2nd hole.
+    for (let i = 1; i < fogPolygon.geometry.coordinates.length; i++) {
+      
+      const holePolygon = turf.polygon([fogPolygon.geometry.coordinates[i]]);
+
+      for (let j = 1; j < fogPolygon.geometry.coordinates.length; j++) {
+
+        if (i === j) { continue }
+        const holePolygonNext = turf.polygon([fogPolygon.geometry.coordinates[j]]);
+
+        if (turf.intersect(holePolygon, holePolygonNext)) {
+          const unitedHolePolygon = turf.union(holePolygon, holePolygonNext);
+          const unitedHolePolygonCoordinates = unitedHolePolygon.geometry.coordinates[0];
+
+          fogPolygon.geometry.coordinates[i] = unitedHolePolygonCoordinates;
+          fogPolygon.geometry.coordinates.splice(j, 1);
+          console.log(fogPolygon, '<-- fixed FP');
+          return fogPolygon;
+        }
+      }
+
+      console.log(fogPolygon.geometry.coordinates.length, '<-- length of FP');
+    }
+
+    
+    return fogPolygon;
+  }
+
 }
 
 
@@ -247,7 +273,7 @@ class TurfHelper {
 
   //Input: user's position.
   //Output: Polygon
-  _createCirclePolygonFromUserPosition(userPosition, size = 0.05, steps = 12) {
+  _createCirclePolygonFromUserPosition(userPosition, size = 0.05, steps = 4) {
     //Firstly a point polygon is required to create a circle using turf.circle()
 
     //The point polygon is generated using the user's longitude and latitude.
@@ -261,7 +287,7 @@ class TurfHelper {
 
   //Input: longitude and latitude.
   //Output: Polygon
-  _createCirclePolygonFromLonLat(longitude, latitude, size = 0.05, steps = 12) {
+  _createCirclePolygonFromLonLat(longitude, latitude, size = 0.05, steps = 4) {
     //Firstly a point polygon is required to create a circle using turf.circle()
 
     //The point polygon is generated using longitude and latitude.
