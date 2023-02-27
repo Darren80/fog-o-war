@@ -21,6 +21,7 @@ const theme = {
   },
 };
 
+//const myProp = 'hello'
 // class App extends React.Component {
 //   render() {
 const App = () => {

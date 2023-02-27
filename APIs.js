@@ -72,9 +72,12 @@ class API {
             })
     }
 
-    deleteFog = (username) => {
+    deleteAllFog = (user_id) => {
         //Action cannot be reversed. Deletes all trips.
-        axios.delete(`/user/${username}`, {})
+        return axios.delete(`/trips/${user_id}`)
+        .then(({data}) => {
+        return data
+        })
     }
 
     postNewMarker = () => {

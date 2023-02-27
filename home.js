@@ -23,6 +23,7 @@ function home({ navigation }) {
   const [userID, setUserID] = useState('test123');
   const turfWorker = new TurfWorker(userID);
 
+  const [ mapColour, setMapColour ] = useState("rgba(218, 223, 225, 1)")
 
   const [currentUserLocation, setCurrentUserLocation] = useState(null);
 
@@ -31,6 +32,8 @@ function home({ navigation }) {
   const [fogPolygon, setFogPolygon] = useState(null);
 
   const [loggedIn, setLoggedIn] = useState(true);
+
+  console.log(mapColour, "Current Map Colour")
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -237,8 +240,8 @@ function home({ navigation }) {
                 geojson={{
                   features: [fogPolygon]
                 }}
-                fillColor='rgba(118,	119,	121	, 0.85)'
-                strokeColor="rgba(218, 223, 225, 1)"
+                fillColor={mapColour}
+                strokeColor={mapColour}
                 strokeWidth={4}
               >
 
@@ -255,7 +258,7 @@ function home({ navigation }) {
             iconColor={MD3Colors.error50}
             style={styles.navButton}
             size={40}
-            onPress={() => loggedIn ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+            onPress={() => loggedIn ? navigation.navigate('Profile', {setMap: setMapColour}) : navigation.navigate('SignIn')}
           />
           <StatusBar style="auto" />
         </View>
