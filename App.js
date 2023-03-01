@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, {useState} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -9,6 +9,8 @@ const Stack = createStackNavigator();
 import signIn from './signIn.js'
 import home from './home.js'
 import profile from './profile.js'
+import scoreboard from './scoreboard'
+
 
 const theme = {
   ...MD3LightTheme, // or MD3DarkTheme
@@ -21,9 +23,12 @@ const theme = {
   },
 };
 
+//const myProp = 'hello'
 // class App extends React.Component {
 //   render() {
 const App = () => {
+  //const [ mapColour, setMapColour ] = useState("rgba(218, 223, 225, 1)")
+
   return (
     <PaperProvider theme={theme}>
       <NavigationContainer>
@@ -39,6 +44,12 @@ const App = () => {
           <Stack.Screen
             name="Profile"
             component={profile}
+            //options={setMapColour}
+          />
+          <Stack.Screen
+            name="Scoreboard"
+            component={scoreboard}
+            
           />
         </Stack.Navigator>
       </NavigationContainer>

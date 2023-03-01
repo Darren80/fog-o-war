@@ -1,36 +1,67 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, Image } from 'react-native';
-import { TextInput, Button, Surface, List, useTheme} from 'react-native-paper'
+import { StyleSheet, View, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native'
+import { TextInput, Button, Surface, List, useTheme, Modal, Portal, Provider, Text} from 'react-native-paper'
+import {deleteAllFog, getUserbyId} from './APIs'
+
+const profile = ({route}) => {
+    const [profileURL, setProfileURL] = useState('https://avatars2.githubusercontent.com/u/24394918?s=400&v=4')
+    const [currentUserId, setCurrentUserID] = useState(3)
+    const [profileDisplayName, setDisplayName] = useState('')
+    const [profileUsername, setProfileUsername] = useState('')
+    const [loading, setLoading] = useState(false)
+
+    //const navigation = useNavigation()
+
+    //console.log(navigation.getState(), "My navigation")
+    //console.log(route.params, "My params")
+
+    const {mapSetter} = route.params
+
+    getUserbyId(currentUserId)
+
+    useEffect(() => {
+        getUserbyId(currentUserId)
+        .then((data) => {
+            setProfileURL(data[0].avatar_url)
+            setDisplayName(data[0].display_name)
+            setProfileUsername(data[0].username)
+        })
+    }, [currentUserId])
 
 
-const profile = () => {
-    const [profileURL, setProfileURL] = useState('https://www.google.com/search?q=dog&rlz=1C1CHBF_en-GBGB991GB991&sxsrf=AJOqlzUbfns4rj4KgJIHlZgFvX__FUTesA:1677347401935&tbm=isch&source=iu&ictx=1&vet=1&fir=NN1-QGCky_XgzM%252CvL0suvKfyYaqHM%252C%252Fm%252F0bt9lr%253BOyQGKst6Lara3M%252CDj243kHCP9nJ-M%252C_%253BeQsdEWaZ6MHrQM%252C2prjuOFdTo6X8M%252C_%253BGbsqgMoKCwHzMM%252C65_J7MmDboKEcM%252C_%253BLdkDcR8aYOxQXM%252CsmcHwKUZvdWsaM%252C_&usg=AI4_-kQerRqCtAwxi4UQGOMadH6_xZ-OOQ&sa=X&ved=2ahUKEwjjqLqAnrH9AhWVFcAKHRx_BwYQ_B16BAh8EAE#imgrc=NN1-QGCky_XgzM')
-    const [profileDisplayName, setDisplayName] = useState('Matt Burnand')
-    const [profileUsername, setProfileUsername] = useState('Mburny_12star')
-    // reset fog history
-    // change colour of fog (?)
-    const theme = useTheme()
-    //console.log(theme, "Matts theme")
-    // share button
-    // invite friends
-    // Privacy
-    // About app
-    // Preferences
+    const onDeletePress = (user_id) => {
+        //preventDefault()
+        setLoading(true)
+        return deleteAllFog(user_id)
+        .then(() => {
+            const timeout = setTimeout(() => {
+                setLoading(false)
+                console.log(loading, "This was after the time out")
+            }, 5000)
+        })
+        .catch((err) => {
+            console.log(err, "Our error")
+        })
+    }
 
-    //useEffect()
+    const [visible, setVisible] = React.useState(false);
 
-    // Alot of this will depend on the user info in data base
+    const showModal = () => setVisible(true);
+    const hideModal = () => setVisible(false);
+    const containerStyle = {backgroundColor: 'white', padding: 20}
+
     return(
         <View>
             <Surface elevation={5}>
             <Image 
-                source={{uri: "https://e7.pngegg.com/pngimages/552/1/png-clipart-dogs-dogs-thumbnail.png"}}
+                source={{uri: profileURL}}
                 style={styles.profilePic}
             />
             </Surface>
             <List.Item
                 title="User:"
-                theme={theme}
+                //theme={theme}
                 //theme={styles.theme}
                 //theme={Primary40}
                 description={profileDisplayName}
@@ -46,6 +77,18 @@ const profile = () => {
                 description="45,000 (example?)"
                 left={props=> <List.Icon icon="airballoon"/>}
             />
+            <List.Accordion title="Customize fog">
+                <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
+                <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
+                <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
+                <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
+                <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
+                <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
+            </List.Accordion>
+            <Button style={{marginTop: 30, right: '35%'}} onPress={() => setVisible(true)}>
+                Delete History
+            </Button>
+            
             <List.Section
             title='Share'
             />
@@ -61,6 +104,17 @@ const profile = () => {
             <List.Section
             title='About App'
             />
+            <Portal>
+                <Modal visible={visible} onDismiss={() => setVisible(false)} contentContainerStyle={containerStyle}>
+                    <Text>
+                        Are you certain you want to delete fog data? This operation cannot be undone
+                    </Text>
+                <Button disabled={loading === true} onPress={() => onDeletePress(currentUserId)}> Delete Fog Data</Button>
+                    <Text>
+                        Click outside this area to dismiss.
+                    </Text>
+                </Modal>
+            </Portal>
         </View>
         
     )

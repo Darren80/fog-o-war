@@ -115,6 +115,14 @@ class API {
                 console.log(response.data, '<-- new marker');
             })
     }
+    
+    deleteAllFog = (user_id) => {
+        //Action cannot be reversed. Deletes all trips.
+        return axios.delete(`/trips/${user_id}/geodata`)
+            .then(({ data }) => {
+                return data
+            })
+    }
 
     getAllMarkers = () => {
         return this.axiosInstance.get(`/api/geodata/`)
@@ -183,5 +191,34 @@ class API {
             });
     }
 }
+
+const fogAPI = axios.create({
+    baseURL: 'https://fog-of-war.onrender.com/api',
+    timeout: 1000
+});
+
+export const deleteAllFog = (user_id) => {
+    return fogAPI.delete(`/trips/${user_id}`)
+        .then((data) => {
+            return data
+        })
+}
+
+
+export const getUserbyId = (user_id) => {
+    return fogAPI.get(`/users/id/${user_id}`)
+        .then(({ data }) => {
+            return data
+        })
+}
+
+export const getScoreBoard = () => {
+    return fogAPI.get(`/scoreboard`)
+        .then(({ data }) => {
+            return data
+        })
+}
+
+
 
 export default API;
