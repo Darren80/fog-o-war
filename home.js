@@ -15,11 +15,8 @@ import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
 import API from "./APIs";
 import { LocationAccuracy } from "expo-location";
-<<<<<<< HEAD
 import AsyncStorage from "@react-native-async-storage/async-storage";
-=======
 import { State } from "react-native-gesture-handler";
->>>>>>> customize_fog
 const api = new API();
 
 
@@ -38,7 +35,7 @@ function home({ navigation, route}) {
 
   const [loggedIn, setLoggedIn] = useState(true);
 
-<<<<<<< HEAD
+
   const [elevationButtonText, setElevationButtonText] = useState('Reveal fog based on elevation');
   const [elevationButtonDisabled, setElevationButtonDisabled] = useState(false);
   const [maxSpeed, setMaxSpeed] = useState(20); //in mph
@@ -46,8 +43,6 @@ function home({ navigation, route}) {
   const [showExcessSpeed, setShowExcessSpeed] = useState(false);
 
   const [savePartialFogData, setSavePartialFogData] = useState(false);
-=======
->>>>>>> customize_fog
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -335,15 +330,9 @@ function home({ navigation, route}) {
                 geojson={{
                   features: [fogPolygon]
                 }}
-<<<<<<< HEAD
-                fillColor='rgba(118,	119,	121	, 0.8)'
-                strokeColor="rgba(218, 223, 225, 1)"
-                strokeWidth={3}
-=======
                 fillColor={mapColour}
                 strokeColor={mapColour}
                 strokeWidth={4}
->>>>>>> customize_fog
               >
 
               </Geojson>
@@ -359,6 +348,7 @@ function home({ navigation, route}) {
             iconColor={MD3Colors.error50}
             //style={styles.navButton}
             size={40}
+
             onPress={() => loggedIn ? navigation.navigate('Profile',  {'mapSetter' : setMapColour}) : navigation.navigate('SignIn')}
             // onPress={() => {if (loggedIn){
             //    navigation.navigate('Profile', {'mapSetter' : setMapColour}) 
@@ -420,12 +410,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     paddingHorizontal: 0
   },
-<<<<<<< HEAD
   excessSpeedCard: {
     position: 'absolute',
     top: '25%',
     left: '0%',
-=======
+  },
   scoreButton: {
     position: 'absolute',
     alignItems: 'center',
@@ -434,7 +423,6 @@ const styles = StyleSheet.create({
     left: '75%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
->>>>>>> customize_fog
   },
   text: {
     fontSize: 16,
