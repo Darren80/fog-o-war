@@ -33,7 +33,8 @@ export function requestPermissions() {
                 //Will run expo-taskmanager if location changes while app is in the background
                 Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
                     accuracy: Location.Accuracy.Highest,
-                    deferredUpdatesDistance: 20
+                    deferredUpdatesDistance: 20,
+                    deferredUpdatesInterval: 1000
                 });
             } else {
                 console.log("Permission to access location in the background was denied");
