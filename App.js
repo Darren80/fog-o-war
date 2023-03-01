@@ -9,6 +9,7 @@ const Stack = createStackNavigator();
 import signIn from './signIn.js'
 import home from './home.js'
 import profile from './profile.js'
+import UserRegistration from './userRegistration.js';
 
 const theme = {
   ...MD3LightTheme, // or MD3DarkTheme
@@ -35,6 +36,10 @@ const App = () => {
           <Stack.Screen
             name="SignIn"
             component={signIn}
+          />
+           <Stack.Screen
+            name="userRegistration"
+            component={UserRegistration}
           />
           <Stack.Screen
             name="Profile"

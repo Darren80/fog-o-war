@@ -4,14 +4,16 @@ import { TextInput, Button } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import { UserContext } from "./UserContext";
 
-const signIn = () => {
+const signIn = ({navigation}) => {
   const [value, onChangeText] = React.useState("");
   const user = React.useContext(UserContext);
 
   const googleSignIn = async () => {
     await WebBrowser.openBrowserAsync(
       `https://fog-of-war-auth.onrender.com/auth/google`
-    );
+    ).then(response => {
+      console.log(response)
+    });
   }
 
   return (
@@ -30,11 +32,10 @@ const signIn = () => {
         style={styles.textInput}
         secureTextEntry={true}
       />
-
       <Button style={styles.Buttons} mode="contained">
         Log In
       </Button>
-      <Button style={styles.Buttons} mode="Text">
+      <Button style={styles.Buttons} mode="Text" onPress={() => navigation.navigate('userRegistration')}>
         Sign Up
       </Button>
     </View>

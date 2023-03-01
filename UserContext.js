@@ -8,16 +8,17 @@ const Context = ({ children }) => {
   }));
 
   useEffect(() => {
-    fetch(`http://fog-of-war-auth.onrender.com/home`, {
+    fetch(`http://fog-of-war-auth.onrender.com/auth/google`, {
       credentials: "include",
     })
       .then(response => response.json())
       .then(data => {
-        console.log({ ...data });
+        console.log(response);
         setUser({ ...data });
+        console.log(user)
       });
   }, []);
-
+  console.log(user)
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };
 
