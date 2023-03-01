@@ -53,11 +53,11 @@ const profile = ({route}) => {
 
     return(
         <View>
-            <Surface elevation={5}>
-            <Image 
-                source={{uri: profileURL}}
-                style={styles.profilePic}
-            />
+            <Surface elevation={5} style={{left:50, padding:10}}>
+                <Image 
+                    source={{uri: profileURL}}
+                    style={styles.profilePic}
+                />
             </Surface>
             <List.Item
                 title="User:"
@@ -91,18 +91,23 @@ const profile = ({route}) => {
             
             <List.Section
             title='Share'
+            left={props=> <List.Icon icon="share-variant"/>}
             />
             <List.Section
             title='Invite Friends'
+            left={props=> <List.Icon icon="offer"/>}
             />
             <List.Section
             title='Privacy'
+            left={props=> <List.Icon icon="alpha-p"/>}
             />
             <List.Section
             title='Preferences'
+            left={props=> <List.Icon icon="application-settings"/>}
             />
             <List.Section
             title='About App'
+            left={props=> <List.Icon icon="information-variant"/>}
             />
             <Portal>
                 <Modal visible={visible} onDismiss={() => setVisible(false)} contentContainerStyle={containerStyle}>
@@ -123,11 +128,15 @@ const profile = ({route}) => {
 
 const styles = StyleSheet.create({
     profilePic:{
-        padding: 80,
-        height: 150,
-        width: 300,
-        alignItems: 'center',
-        //alignSelf: 'flex',
+        //margin: auto,
+         width: '50%',
+        border: '3px solid green',
+        padding: '10px',
+        //padding: 120,
+        // height: 150,
+        // width: 300,
+        alignItems: 'centre',
+        alignSelf: 'flex',
         justifyContent: 'center',
       }
 })

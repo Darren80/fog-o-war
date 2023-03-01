@@ -346,7 +346,7 @@ function home({ navigation, route}) {
         <View style={styles.navButton}>
           <IconButton
             icon='account-circle'
-            //iconColor={MD3Colors.error50}
+            iconColor={MD3Colors.Tertiary10}
             //style={styles.navButton}
             size={40}
             onPress={() => loggedIn ? navigation.navigate('Profile',  {'mapSetter' : setMapColour}) : navigation.navigate('SignIn')}
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   map: {
-    width: "90%",
+    width: "100%",
     height: "90%",
   },
   button: {
