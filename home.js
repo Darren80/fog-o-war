@@ -282,10 +282,12 @@ function home({ navigation }) {
             <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} imageAdded={imageAdded} setViewImage={setViewImage} markers={markers}/> : null)
         }
         {
-          clickMarker ?
+          loggedIn ?
+          (clickMarker ?
           <Pressable style={styles.deleteButton} onPress={deleteMarker}>
             <Text style={styles.text}>Remove Marker</Text>
-          </Pressable> : null
+          </Pressable> : null)
+          : null
        
         }
 
