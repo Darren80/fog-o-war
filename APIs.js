@@ -12,6 +12,12 @@ export async function postNewUser (newUser) {
   });
 };
 
+export async function userLogIn (userInfo) {
+    return await api.post('auth/login', userInfo).then((user) => {
+        return user.data;
+    })
+}
+
 class API {
   password = "";
   username = "";

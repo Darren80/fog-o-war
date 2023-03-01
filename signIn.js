@@ -3,10 +3,15 @@ import { StyleSheet, Text, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import { UserContext } from "./UserContext";
+import { userLogIn } from "./APIs";
 
 const signIn = ({navigation}) => {
   const [value, onChangeText] = React.useState("");
-  const user = React.useContext(UserContext);
+  const [username, setUsername] = React.useState("")
+  const [password, setPassword] = React.useState("")
+  const [loggingIn, setLoggingIn] = React.useState(false)
+  const [loggedIn, setLoggedIn] = React.useState(false)
+  const [user, setUser] = React.useState({})
 
   const googleSignIn = async () => {
     await WebBrowser.openBrowserAsync(
@@ -16,6 +21,31 @@ const signIn = ({navigation}) => {
     });
   }
 
+  const handleClick = (e) => {
+    e.preventDefault();
+    setLoggingIn(true);
+    setLoggedIn(false)
+    userLogIn({
+      username: username,
+      password: password,
+    }).then(loggedInUser => setUser(loggedInUser)).catch((err) => {
+      console.log(err)
+      return err;
+    });
+    setLoggedIn(true)
+    setLoggingIn(false)
+  };
+
+  if (loggingIn) {
+    console.log("logging in...")
+  }
+
+  if (loggedIn) {
+    console.log("logged in!")
+  }
+
+  console.log(user)
+
   return (
     <View>
       <Button style={styles.Buttons} mode="contained" onPress={googleSignIn}>
@@ -24,15 +54,17 @@ const signIn = ({navigation}) => {
       <TextInput
         label="Email"
         style={styles.textInput}
-        value={value}
-        onChangeText={(text) => onChangeText(text)}
+        value={username}
+        onChangeText={(text) => setUsername(text)}
       />
       <TextInput
         label="Password"
+        value={password}
         style={styles.textInput}
         secureTextEntry={true}
+        onChangeText={(text) => setPassword(text)}
       />
-      <Button style={styles.Buttons} mode="contained">
+      <Button style={styles.Buttons} mode="contained" onPress={handleClick}>
         Log In
       </Button>
       <Button style={styles.Buttons} mode="Text" onPress={() => navigation.navigate('userRegistration')}>
