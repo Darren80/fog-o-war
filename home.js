@@ -7,7 +7,7 @@ import * as TaskManager from 'expo-task-manager';
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
-import { IconButton, MD3Colors, Avatar, Button } from 'react-native-paper'
+import { IconButton, MD3Colors, Avatar, Button, Card, Title, Paragraph } from 'react-native-paper'
 
 import ImageAdder from "./ImageAdder";
 
@@ -15,12 +15,13 @@ import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
 import API from "./APIs";
 import { LocationAccuracy } from "expo-location";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const api = new API();
 
 
 function home({ navigation }) {
   const [username, setUsername] = useState(null);
-  const [userID, setUserID] = useState('test123');
+  const [userID, setUserID] = useState('1');
   const turfWorker = new TurfWorker(userID);
 
 
@@ -31,6 +32,14 @@ function home({ navigation }) {
   const [fogPolygon, setFogPolygon] = useState(null);
 
   const [loggedIn, setLoggedIn] = useState(true);
+
+  const [elevationButtonText, setElevationButtonText] = useState('Reveal fog based on elevation');
+  const [elevationButtonDisabled, setElevationButtonDisabled] = useState(false);
+  const [maxSpeed, setMaxSpeed] = useState(20); //in mph
+
+  const [showExcessSpeed, setShowExcessSpeed] = useState(false);
+
+  const [savePartialFogData, setSavePartialFogData] = useState(false);
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -47,29 +56,46 @@ function home({ navigation }) {
 
     //Request both background and foreground location permissions.
     requestPermissions()
+      .then(() => {
+        console.log('Permissions granted');
+
+        // GET trips from DB.
+        api.getFogData(userID)
+          .then((fogData) => {
+            const newFogPolygon = turfWorker.rebuildFogPolygonFromFogData(fogData)
+            setFogPolygon(newFogPolygon);
+          })
+          .catch((err) => {
+            console.log('Couldn\'t get newest fog data: ', err);
+
+            const newFogPolygon = turfWorker.generateNewFogPolygon();
+            setFogPolygon(newFogPolygon);
+          })
+          .finally(() => {
+            //Retrive background fog data if exists
+            AsyncStorage.getItem('@partial_fog_data')
+            .then((fogData) => {
+              setPartialFogData(fogData !== null ? JSON.parse(fogData) : null);
+            })
+
+            //Will change current position when location changes while app is in the foreground.
+            Location.watchPositionAsync({
+              accuracy: Location.Accuracy.Highest,
+              distanceInterval: 20,
+            }, (newUserLocation) => {
+              setCurrentUserLocation(newUserLocation);
+            });
+          })
+
+      })
       .catch((err) => {
         setLocationErrorMessage(err);
       })
 
-    // GET trips from DB.
-    api.getFogData(userID)
-      .then((fogData) => {
-        const newFogPolygon = turfWorker.rebuildFogPolygonFromFogData(fogData)
-        setFogPolygon(newFogPolygon);
-      })
-      .catch(() => {
-        const newFogPolygon = turfWorker.generateNewFogPolygon();
-        setFogPolygon(newFogPolygon);
-      })
-      .finally(() => {
-        //Will change current position when location changes while app is in the foreground.
-        Location.watchPositionAsync({
-          accuracy: Location.Accuracy.Highest,
-          distanceInterval: 20,
-        }, (newUserLocation) => {
-          setCurrentUserLocation(newUserLocation);
-        });
-      })
+    //When true the app can tack on the fog data to the database.
+    setInterval(() => {
+      setSavePartialFogData(true);
+    }, 10000);
 
   }, [])
 
@@ -77,18 +103,50 @@ function home({ navigation }) {
   useEffect(() => {
     if (!currentUserLocation) { return }
 
+    let maxMph = maxSpeed;
+    let maxMetersPerSecond = maxMph / 2.237;
+    //If the user's speed is above maxSpeed, then stop uncovering fog.
+    if (currentUserLocation.coords.speed > maxMetersPerSecond) {
+      console.log(currentUserLocation.coords.speed, '<-- Speed exceeds maximum!');
+      setShowExcessSpeed(true);
+      return;
+    } else {
+      setShowExcessSpeed(false);
+    }
+
     uncoverFog();
 
+    // console.log(partialFogData, '<-- parital fog data');
     // console.log(newPartialFogData, '<-- parital fog data to save to local storage, then send to db after x time');
 
-
-
-    //TODO: Write fog data to local storage. ------------------------------------------
-
-    //TODO: Write fog data to database after set amount of time e.g. every minute. ---------------------------------------------
-    //TODO: Reset fog data in local storage after database 200 OK. ---------------------------------------------
+    //TODO: Write partial fog data to local storage, in case app closes. ------------------------------------------
+    AsyncStorage
 
   }, [currentUserLocation])
+
+  //Runs when savePartialFogData becomes true, i.e. every 10 seconds.
+  useEffect(() => {
+    //Save fog data to database every 'x' milliseconds.
+    if (!partialFogData || !savePartialFogData) { return }
+    setSavePartialFogData(false)
+
+    console.log(partialFogData, '<-- parital fog data to save');
+
+    api.postFogData(partialFogData)
+      .then(() => {
+        setPartialFogData(null)
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+  }, [savePartialFogData])
+
+  //Runs every time the partial fog data is updated, i.e. when the user moves.
+  useEffect(() => {
+        AsyncStorage.setItem('@partial_fog_data', JSON.stringify(partialFogData))
+        .catch(e => { console.log(e) })
+  }, [partialFogData])
 
   const uncoverFog = (userHeightAboveGround) => {
     if (userHeightAboveGround) {
@@ -98,7 +156,7 @@ function home({ navigation }) {
     }
 
     //Check overlapping
-    
+
 
     //Uncover new area in fog
     const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(currentUserLocation, fogPolygon, partialFogData);
@@ -121,7 +179,7 @@ function home({ navigation }) {
     }
   }
 
-  const getCurrentElevation = () => {
+  const getCurrentElevation = (e) => {
 
     //Get current elevation according to GPS.
     Location.getCurrentPositionAsync({
@@ -144,16 +202,43 @@ function home({ navigation }) {
 
         const userHeightAboveGround = currentAltitude - elevationResponse.results[0].elevation;
 
+        console.log('---------------------------------');
         console.log('accuracy: ', currentAltitudeAccuracy, 'm');
         console.log('user height above ground sea level: ', currentAltitude, 'm');
         console.log('height of ground above sea level: ', elevationResponse.results[0].elevation, 'm');
         console.log('user is ', userHeightAboveGround, 'm above ground level.');
+        console.log('---------------------------------');
 
         if (userHeightAboveGround >= 0) {
           uncoverFog(userHeightAboveGround);
         }
+
+        //Display data to user through the button.
+        setElevationButtonText('Your elevation is: ' + userHeightAboveGround.toPrecision(3) + 'm above ground')
+        setElevationButtonDisabled(true)
+        setTimeout(() => {
+          setElevationButtonText('Reveal fog based on elevation')
+          setElevationButtonDisabled(false)
+        }, 4000)
       })
 
+  }
+
+  const myPic = require('./images/speedometer.jpg');
+  const ExcessSpeedCard = () => {
+    return (
+      <View style={styles.excessSpeedCard}>
+        {showExcessSpeed ?
+          <Card>
+            <Card.Content>
+              <Title>Speed too fast</Title>
+              <Paragraph>{`Fog motion will not be tracked when your speed exceeds ${maxSpeed}M/ph`}</Paragraph>
+            </Card.Content>
+            <Card.Cover source={{ uri: 'https://thumbs.dreamstime.com/b/speedometer-going-too-fast-11058210.jpg' }} />
+          </Card>
+          : <Text>FASFAFAF</Text>}
+      </View>
+    )
   }
 
   if (locationErrorMessage) {
@@ -181,11 +266,10 @@ function home({ navigation }) {
     </View>
   );
 
-  //TODO: Put button at bottom of map.
   const ElevationButton = () => (
     <View style={styles.container}>
-      <Button onPress={getCurrentElevation} compact={true}>
-        Reveal fog based on elevation
+      <Button onPress={getCurrentElevation} icon='access-point' mode="outlined" compact={true} disabled={elevationButtonDisabled}>
+        {elevationButtonText}
       </Button>
     </View>
   );
@@ -223,7 +307,7 @@ function home({ navigation }) {
                     }}>
                     {
                       imageAdded ?
-                        <Image source={{ uri: marker.image }} style={{ width: 30, height: 30 }} />
+                        <Image source={{ uri: marker.image }} style={{ width: 30, height: 30 }} resizeMode={'cover'} />
                         : null
                     }
                   </Marker>
@@ -237,9 +321,9 @@ function home({ navigation }) {
                 geojson={{
                   features: [fogPolygon]
                 }}
-                fillColor='rgba(118,	119,	121	, 0.85)'
+                fillColor='rgba(118,	119,	121	, 0.8)'
                 strokeColor="rgba(218, 223, 225, 1)"
-                strokeWidth={4}
+                strokeWidth={3}
               >
 
               </Geojson>
@@ -259,6 +343,9 @@ function home({ navigation }) {
           />
           <StatusBar style="auto" />
         </View>
+
+        <ExcessSpeedCard />
+
 
         {
           clickMarker ?
@@ -297,6 +384,11 @@ const styles = StyleSheet.create({
     left: '75%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
+  },
+  excessSpeedCard: {
+    position: 'absolute',
+    top: '25%',
+    left: '0%',
   },
   text: {
     fontSize: 16,

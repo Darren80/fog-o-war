@@ -16,12 +16,6 @@ export class TurfWorker {
   //Output:
   uncoverFog(userPosition, fogPolygon, partialFogData, circleMultiplyer = 1) {
 
-    //TODO: block the uncovering of fog if the user's speed exceeds walking or cycling speed.
-    if (userPosition.coords.speed > 7.15264) { //If the user's speed is above or equal to 16Mp/h or 7.15264m/s
-      //Create a MODAL to the user telling them their speed is too high to track their progress.
-      console.log('Speed exceeds maximum!');
-    }
-
     //Create new circle polygon based on the user's position.
     const circlePolygon = this.turfHelper._createCirclePolygonFromUserPosition(userPosition, this.circleSize);
 
@@ -206,7 +200,7 @@ export class TurfWorker {
   fixFog(fogPolygon) {
     //For each hole in the fog-polygon from 2nd hole.
     for (let i = 1; i < fogPolygon.geometry.coordinates.length; i++) {
-      
+
       const holePolygon = turf.polygon([fogPolygon.geometry.coordinates[i]]);
 
       for (let j = 1; j < fogPolygon.geometry.coordinates.length; j++) {
@@ -220,12 +214,12 @@ export class TurfWorker {
 
           fogPolygon.geometry.coordinates[i] = unitedHolePolygonCoordinates;
           fogPolygon.geometry.coordinates.splice(j, 1);
-          console.log(fogPolygon, '<-- fixed FP');
+          // console.log(fogPolygon, '<-- fixed FP');
           return fogPolygon;
         }
       }
 
-      console.log(fogPolygon.geometry.coordinates.length, '<-- length of FP');
+      // console.log(fogPolygon.geometry.coordinates.length, '<-- length of FP');
     }
 
     
@@ -246,10 +240,6 @@ export class TurfWorker {
 
 class TurfHelper {
   constructor() {
-  }
-
-  _determineCircleSizeBasedOnElevation(userPosition) {
-    console.log('Altitude: ', userPosition.coords.altitude, 'Altitude Acc: ', userPosition.coords.altitudeAccuracy);
   }
 
   //Input: None
