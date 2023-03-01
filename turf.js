@@ -66,6 +66,23 @@ export class TurfWorker {
 
   }
 
+  distanceBetweenPoints(markerPoint, userCurrentLocation) {
+    
+    const pointPosition = turf.point([markerPoint.longitude, markerPoint.latitude]);
+
+    const from = pointPosition.geometry.coordinates;
+
+    const userPosition = turf.point([userCurrentLocation.coords.longitude, userCurrentLocation.coords.latitude]);
+
+    const  to = userPosition.geometry.coordinates;
+
+    const options = {units: 'miles'};
+    
+    const distance = turf.distance(from, to, options);
+
+    return distance;
+  }
+
   addUserPositionToFogData(userPosition, partialFogData) {
     //fogData may be empty when application starts, if no data in local storage.
     if (!partialFogData) {

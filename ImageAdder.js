@@ -1,7 +1,10 @@
 import * as ImagePicker from 'expo-image-picker';
+import { useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from "react-native";
 
-export default function ImageAdder({ setImageAdded, setMarkers }) {
+export default function ImageAdder({ setImageAdded, setMarkers, imageAdded, setViewImage, markers }) {
+
+    const [deleteImage, setDeleteImage] = useState(null);
 
     const pickImage = async () => {
     // No permissions request is necessary for launching the image library
@@ -23,6 +26,8 @@ export default function ImageAdder({ setImageAdded, setMarkers }) {
 
             return currMarker;    
           });   
+
+      setDeleteImage(result.assets[0].uri);
     }
   };
 
@@ -31,7 +36,7 @@ export default function ImageAdder({ setImageAdded, setMarkers }) {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
 
     if (permissionResult.granted === false) {
-      alert("You've refused to allow this appp to access your camera!");
+      alert("You've refused to allow this app to access your camera!");
       return;
         }
 
@@ -40,17 +45,40 @@ export default function ImageAdder({ setImageAdded, setMarkers }) {
     if (!result.canceled) {
       setImageAdded(true);
           setMarkers((currMarker) => {
-          
+            console.log(currMarker, '<-- marker inside open camera');
             const position = currMarker.length - 1;
 
             currMarker[position]['image'] = result.assets[0].uri;
 
             return currMarker;    
-          });   
+          });
+          
+          setDeleteImage(result.assets[0].uri);
         }
     };
+    console.log(markers, '<-- marker outside open camera');
+
+    const removeImage = () => {
+      const filteredImage = markers.filter((marker) => {
+        return marker.image !== deleteImage;
+      })
+      setMarkers(filteredImage);
+      setImageAdded(false);
+    }
 
     return (
+      <>
+      {
+        imageAdded ?
+        <View style={styles.buttonContainer}>
+        <Pressable style={styles.button} onPress={removeImage}>
+          <Text style={styles.text}>Remove Image</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={() => setViewImage(true)}>
+          <Text style={styles.text}>View Image</Text>
+        </Pressable>
+        </View>
+      :
       <View style={styles.buttonContainer}>
       <Pressable style={styles.button} onPress={pickImage}>
         <Text style={styles.text}>Pick Image</Text>
@@ -59,6 +87,8 @@ export default function ImageAdder({ setImageAdded, setMarkers }) {
         <Text style={styles.text}>Open Camera</Text>
       </Pressable>
    </View>
+  }
+      </>
     )
 
 }
@@ -76,7 +106,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingVertical: 10,
     paddingHorizontal: 25,
-    borderRadius: 4,
+    borderRadius: 50,
     elevation: 2,
     backgroundColor: 'black',
   },
