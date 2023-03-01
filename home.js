@@ -20,7 +20,7 @@ const api = new API();
 
 
 function home({ navigation }) {
-  
+  const [loggedIn, setLoggedIn] = useState()
   const user = useContext(UserContext);
 
   const [username, setUsername] = useState(null);
@@ -33,8 +33,6 @@ function home({ navigation }) {
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
 
   const [fogPolygon, setFogPolygon] = useState(null);
-
-  const [loggedIn, setLoggedIn] = useState(false);
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -259,7 +257,7 @@ function home({ navigation }) {
             iconColor={MD3Colors.error50}
             style={styles.navButton}
             size={40}
-            onPress={() => user?.loggedIn === true ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+            onPress={() => loggedIn == true ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
           />
           <StatusBar style="auto" />
         </View>

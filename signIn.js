@@ -2,11 +2,9 @@ import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
-import { UserContext } from "./UserContext";
 import { userLogIn } from "./APIs";
 
 const signIn = ({navigation}) => {
-  const [value, onChangeText] = React.useState("");
   const [username, setUsername] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [loggingIn, setLoggingIn] = React.useState(false)
@@ -28,7 +26,7 @@ const signIn = ({navigation}) => {
     userLogIn({
       username: username,
       password: password,
-    }).then(loggedInUser => setUser(loggedInUser)).catch((err) => {
+    }).then(navigation.navigate('Home')).catch((err) => {
       console.log(err)
       return err;
     });
@@ -64,7 +62,7 @@ const signIn = ({navigation}) => {
         secureTextEntry={true}
         onChangeText={(text) => setPassword(text)}
       />
-      <Button style={styles.Buttons} mode="contained" onPress={handleClick}>
+      <Button style={styles.Buttons} mode="contained" onPress={(e) => handleClick(e)}>
         Log In
       </Button>
       <Button style={styles.Buttons} mode="Text" onPress={() => navigation.navigate('userRegistration')}>
@@ -73,8 +71,6 @@ const signIn = ({navigation}) => {
     </View>
   );
 };
-
-// ...
 
 const styles = StyleSheet.create({
   textInput: {
