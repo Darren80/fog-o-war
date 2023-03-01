@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { UserContext } from './UserContext.js';
 
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
@@ -19,6 +20,9 @@ const api = new API();
 
 
 function home({ navigation }) {
+  
+  const user = useContext(UserContext);
+
   const [username, setUsername] = useState(null);
   const [userID, setUserID] = useState('test123');
   const turfWorker = new TurfWorker(userID);
@@ -30,7 +34,7 @@ function home({ navigation }) {
 
   const [fogPolygon, setFogPolygon] = useState(null);
 
-  const [loggedIn, setLoggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -159,7 +163,7 @@ function home({ navigation }) {
   if (locationErrorMessage) {
     return (
       <View style={styles.container}>
-        <Text style={styles.paragraph}>{errorMsg}</Text>
+        {/* <Text style={styles.paragraph}>{errorMsg}</Text> */}
       </View>
     );
   }
@@ -255,7 +259,7 @@ function home({ navigation }) {
             iconColor={MD3Colors.error50}
             style={styles.navButton}
             size={40}
-            onPress={() => loggedIn ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+            onPress={() => user?.loggedIn === true ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
           />
           <StatusBar style="auto" />
         </View>
