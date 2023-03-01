@@ -9,27 +9,21 @@ const UserRegistration = () => {
   const [displayName, setDisplayName] = React.useState("");
   const [posting, setPosting] = React.useState(false);
   const [posted, setPosted] = React.useState(false);
-  const [users, setUsers] = React.useState([])
 
   const handleClick = (e) => {
     e.preventDefault();
     setPosting(true);
+    setPosted(false)
     postNewUser({
       display_name: displayName,
       username: username,
       password: password,
-    })
-      .then((newUser) => {
-        setUsers((currUsers) => {
-          return [newUser, ...currUsers];
-        });
-        setPosted(true);
-        setPosting(false);
-      })
-      .catch((err) => {
-        console.log(err)
-        return err;
-      });
+    }).catch((err) => {
+      console.log(err)
+      return err;
+    });
+    setPosted(true)
+    setPosting(false)
   };
 
   if (posting) {
@@ -40,6 +34,7 @@ const UserRegistration = () => {
     console.log("new user created!")
   }
 
+  
   return (
     <>
       <TextInput

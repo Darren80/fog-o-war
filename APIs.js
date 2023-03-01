@@ -7,9 +7,8 @@ export const api = axios.create({
 });
 
 export async function postNewUser (newUser) {
-  return await api.post(`/auth/signup`, newUser).then(({ userData }) => {
-    console.log(userData)
-    return userData;
+  return await api.post(`/auth/signup`, newUser).then((userData) => {
+    return userData.data
   });
 };
 
