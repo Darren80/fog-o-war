@@ -7,7 +7,7 @@ import * as TaskManager from 'expo-task-manager';
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
-import { IconButton, MD3Colors, Avatar, Button, Card, Title, Paragraph } from 'react-native-paper'
+import { IconButton, MD3Colors, Avatar, Button, Card, Title, Paragraph, ProgressBar } from 'react-native-paper'
 
 import ImageAdder from "./ImageAdder";
 
@@ -17,6 +17,8 @@ import API from "./APIs";
 import { LocationAccuracy } from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { State } from "react-native-gesture-handler";
+
+//const loadingPicture = require('C:\Users\burna\Coding\fog-o-war\startingPic.jpg')
 const api = new API();
 
 
@@ -26,6 +28,8 @@ function home({ navigation, route}) {
   const turfWorker = new TurfWorker(userID);
 
   const [ mapColour, setMapColour ] = useState("rgba(218, 223, 225, 1)")
+
+  const [ loading, setLoading] = useState(true)
 
   const [currentUserLocation, setCurrentUserLocation] = useState(null);
 
@@ -44,6 +48,8 @@ function home({ navigation, route}) {
 
   const [savePartialFogData, setSavePartialFogData] = useState(false);
 
+  //console.log(loadingPicture, "matts loading picture")
+
   //Markers
   const [markers, setMarkers] = useState([]);
   const [clickMarker, setClickMarker] = useState(false);
@@ -52,6 +58,8 @@ function home({ navigation, route}) {
 
   //Data to send via /trips/:trip_id
   const [partialFogData, setPartialFogData] = useState(null);
+
+  
 
   //Runs once at the start of the program.
   useEffect(() => {
@@ -191,8 +199,9 @@ function home({ navigation, route}) {
       .then((newUserLocation) => {
         const currentLatitude = newUserLocation.coords.latitude;
         const currentLongitude = newUserLocation.coords.longitude;
-
-        setCurrentUserLocation(newUserLocation);
+          
+          setCurrentUserLocation(newUserLocation);
+  
 
         return Promise.all([api.getElevation(currentLatitude, currentLongitude), newUserLocation])
       })
@@ -255,7 +264,7 @@ function home({ navigation, route}) {
   if (!currentUserLocation) {
     return (
       <View style={styles.container}>
-        <Text style={styles.paragraph}>Loading location...{currentUserLocation}</Text>
+        <Image style={{width: 400, height: 845,}} source={{uri: 'https://images.unsplash.com/photo-1540844775339-de8c67e13da4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=776&q=80' }}/>
       </View>
     );
   }
@@ -286,97 +295,97 @@ function home({ navigation, route}) {
   if (currentUserLocation) {
     return (
       <View style={styles.container}>
-        <Text>Fog-Of-War</Text>
-        
-        <MapView
-          initialRegion={{
-            latitude: currentUserLocation.coords.latitude,
-            longitude: currentUserLocation.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          provider={PROVIDER_GOOGLE}
-          style={styles.map}
-          showsUserLocation={true}
-          mapPadding={{
-            top: 30,
-          }}
-          onPress={(e) => markerPositionSelected(e)}
-        >
+          {/* {loading ? <View><Image style={{width: 400, height: 825,}} source={{uri: 'https://images.unsplash.com/photo-1540844775339-de8c67e13da4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=776&q=80' }}/></View> : */}
+            <MapView
+              initialRegion={{
+                latitude: currentUserLocation.coords.latitude,
+                longitude: currentUserLocation.coords.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }}
+              provider={PROVIDER_GOOGLE}
+              style={styles.map}
+              showsUserLocation={true}
+              mapPadding={{
+                top: 30,
+              }}
+              onPress={(e) => markerPositionSelected(e)}
+            >
 
-          {
-            pointsWithingPolygon ?
-              (
-                markers.map((marker, i) => (
-                  <Marker
-                    coordinate={marker.coords}
-                    key={i}
-                    onPress={() => {
-                      setClickMarker(current => !current);
-                      setImageAdded(current => !current);
-                    }}>
-                    {
-                      imageAdded ?
-                        <Image source={{ uri: marker.image }} style={{ width: 30, height: 30 }} resizeMode={'cover'} />
-                        : null
-                    }
-                  </Marker>
-                ))
-              ) : null
-          }
+              {
+                pointsWithingPolygon ?
+                  (
+                    markers.map((marker, i) => (
+                      <Marker
+                        coordinate={marker.coords}
+                        key={i}
+                        onPress={() => {
+                          setClickMarker(current => !current);
+                          setImageAdded(current => !current);
+                        }}>
+                        {
+                          imageAdded ?
+                            <Image source={{ uri: marker.image }} style={{ width: 30, height: 30 }} resizeMode={'cover'} />
+                            : null
+                        }
+                      </Marker>
+                    ))
+                  ) : null
+              }
 
-          {
-            fogPolygon ?
-              <Geojson
-                geojson={{
-                  features: [fogPolygon]
-                }}
-                fillColor={mapColour}
-                strokeColor={mapColour}
-                strokeWidth={4}
-              >
+              {
+                fogPolygon ?
+                  <Geojson
+                    geojson={{
+                      features: [fogPolygon]
+                    }}
+                    fillColor={mapColour}
+                    strokeColor={mapColour}
+                    strokeWidth={4}
+                  >
 
-              </Geojson>
-              : null
-          }
-        </MapView>
+                  </Geojson>
+                  : null
+              }
+            </MapView>
 
-        <ElevationButton />
+            <ElevationButton />
 
-        <View style={styles.navButton}>
-          <IconButton
-            icon='account-circle'
-            //iconColor={MD3Colors.error50}
-            //style={styles.navButton}
-            size={40}
-            onPress={() => loggedIn ? navigation.navigate('Profile',  {'mapSetter' : setMapColour}) : navigation.navigate('SignIn')}
-            // onPress={() => {if (loggedIn){
-            //    navigation.navigate('Profile', {'mapSetter' : setMapColour}) 
-            //    //navigation.setState(setMapColour)
-            //   } else {navigation.navigate('SignIn')
-            // }}}
-          />
-          <StatusBar style="auto" />
-        </View>
-        <View style={styles.scoreButton}>
-          <IconButton
-            icon='arrow-projectile-multiple'
-            iconColor={MD3Colors.error50}
-            style={styles.scoreButton}
-            size={40}
-            onPress={() => navigation.navigate('Scoreboard')}
-          />
-          <StatusBar style="auto" />
-        </View>
+            <View style={styles.navButton}>
+              <IconButton
+                icon='account-circle'
+                //iconColor={MD3Colors.error50}
+                //style={styles.navButton}
+                size={40}
+                onPress={() => loggedIn ? navigation.navigate('Profile',  {'mapSetter' : setMapColour}) : navigation.navigate('SignIn')}
+                // onPress={() => {if (loggedIn){
+                //    navigation.navigate('Profile', {'mapSetter' : setMapColour}) 
+                //    //navigation.setState(setMapColour)
+                //   } else {navigation.navigate('SignIn')
+                // }}}
+              />
+              <StatusBar style="auto" />
+            </View>
+            <View style={styles.scoreButton}>
+              <IconButton
+                icon='arrow-projectile-multiple'
+                iconColor={MD3Colors.error50}
+                style={styles.scoreButton}
+                size={40}
+                onPress={() => navigation.navigate('Scoreboard')}
+              />
+              <StatusBar style="auto" />
+            </View>
 
-        <ExcessSpeedCard />
+            <ExcessSpeedCard />
 
 
-        {
-          clickMarker ?
-            <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} /> : null
-        }
+            {
+              clickMarker ?
+                <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} /> : null
+            }
       </View>
+      
     );
   }
 }
@@ -389,7 +398,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   map: {
-    width: "90%",
+    width: "100%",
     height: "90%",
   },
   button: {
