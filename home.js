@@ -15,10 +15,11 @@ import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
 import API from "./APIs";
 import { LocationAccuracy } from "expo-location";
+import { State } from "react-native-gesture-handler";
 const api = new API();
 
 
-function home({ navigation }) {
+function home({ navigation, route}) {
   const [username, setUsername] = useState(null);
   const [userID, setUserID] = useState('test123');
   const turfWorker = new TurfWorker(userID);
@@ -33,7 +34,6 @@ function home({ navigation }) {
 
   const [loggedIn, setLoggedIn] = useState(true);
 
-  console.log(mapColour, "Current Map Colour")
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -193,6 +193,12 @@ function home({ navigation }) {
     </View>
   );
 
+
+  //Matts trial work
+  // const mapSetter = (colour) => {
+  //   setMapColour(colour)
+  //   }
+
   if (currentUserLocation) {
     return (
       <View style={styles.container}>
@@ -256,9 +262,24 @@ function home({ navigation }) {
           <IconButton
             icon='account'
             iconColor={MD3Colors.error50}
-            style={styles.navButton}
+            //style={styles.navButton}
             size={40}
-            onPress={() => loggedIn ? navigation.navigate('Profile', {setMap: setMapColour}) : navigation.navigate('SignIn')}
+            onPress={() => loggedIn ? navigation.navigate('Profile',  {'mapSetter' : setMapColour}) : navigation.navigate('SignIn')}
+            // onPress={() => {if (loggedIn){
+            //    navigation.navigate('Profile', {'mapSetter' : setMapColour}) 
+            //    //navigation.setState(setMapColour)
+            //   } else {navigation.navigate('SignIn')
+            // }}}
+          />
+          <StatusBar style="auto" />
+        </View>
+        <View style={styles.scoreButton}>
+          <IconButton
+            icon='arrow-projectile-multiple'
+            //iconColor={MD3Colors.error50}
+            style={styles.scoreButton}
+            size={40}
+            onPress={() => navigation.navigate('Scoreboard')}
           />
           <StatusBar style="auto" />
         </View>
@@ -297,6 +318,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     top: '20%',
+    left: '75%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
+  },
+  scoreButton: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '15%',
     left: '75%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
