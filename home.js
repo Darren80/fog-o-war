@@ -239,7 +239,7 @@ function home({ navigation, route}) {
             </Card.Content>
             <Card.Cover source={{ uri: 'https://thumbs.dreamstime.com/b/speedometer-going-too-fast-11058210.jpg' }} />
           </Card>
-          : <Text>FASFAFAF</Text>}
+          : null}
       </View>
     )
   }
@@ -287,6 +287,7 @@ function home({ navigation, route}) {
     return (
       <View style={styles.container}>
         <Text>Fog-Of-War</Text>
+        
         <MapView
           initialRegion={{
             latitude: currentUserLocation.coords.latitude,
@@ -344,11 +345,10 @@ function home({ navigation, route}) {
 
         <View style={styles.navButton}>
           <IconButton
-            icon='account'
-            iconColor={MD3Colors.error50}
+            icon='account-circle'
+            //iconColor={MD3Colors.error50}
             //style={styles.navButton}
             size={40}
-
             onPress={() => loggedIn ? navigation.navigate('Profile',  {'mapSetter' : setMapColour}) : navigation.navigate('SignIn')}
             // onPress={() => {if (loggedIn){
             //    navigation.navigate('Profile', {'mapSetter' : setMapColour}) 
@@ -361,7 +361,7 @@ function home({ navigation, route}) {
         <View style={styles.scoreButton}>
           <IconButton
             icon='arrow-projectile-multiple'
-            //iconColor={MD3Colors.error50}
+            iconColor={MD3Colors.error50}
             style={styles.scoreButton}
             size={40}
             onPress={() => navigation.navigate('Scoreboard')}
@@ -405,8 +405,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    top: '20%',
-    left: '75%',
+    top: '5%',
+    left: '64%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
   },
@@ -419,8 +419,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    top: '15%',
-    left: '75%',
+    top: '5%',
+    left: '47%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
   },
@@ -432,6 +432,15 @@ const styles = StyleSheet.create({
     color: 'white',
     width: "88%",
     height: "88%"
+  },
+  fogTitle: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '100%',
+    left: '47%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
   }
 })
 

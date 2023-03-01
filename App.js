@@ -36,6 +36,7 @@ const App = () => {
           <Stack.Screen
             name="Home"
             component={home}
+            options={{headerShown: false}}
           />
           <Stack.Screen
             name="SignIn"
