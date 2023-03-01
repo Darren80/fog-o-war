@@ -6,16 +6,42 @@ export const api = axios.create({
   baseURL: "https://fog-of-war-auth.onrender.com",
 });
 
-export async function postNewUser (newUser) {
+export async function postNewUser(newUser) {
   return await api.post(`/auth/signup`, newUser).then((userData) => {
-    return userData.data
+    return userData.data;
   });
-};
+}
 
-export async function userLogIn (userInfo) {
-    return await api.post('auth/login', userInfo).then((user) => {
-        return user.data;
-    })
+export async function getHome() {
+  return await api.get(`/home`).then((response) => {
+    console.log(response.data, "<= home");
+    return response.data;
+  });
+}
+
+export async function getProfile() {
+  return await api.get("/api/profile").then((response) => {
+    console.log(response.data);
+  });
+}
+
+export async function getTrips() {
+  return await api.get("/api/trips/me").then((response) => {
+    console.log(JSON.stringify(response.data));
+  });
+}
+
+export async function userLogIn(userInfo) {
+  return await api.post("/auth/login", userInfo).then((user) => {
+    console.log(user.data, "logged in");
+    getHome();
+  });
+}
+
+export async function userLogOut() {
+  return await api.get("/auth/logout").then(() => {
+    console.log("logged out");
+  });
 }
 
 class API {

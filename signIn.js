@@ -3,46 +3,79 @@ import { StyleSheet, Text, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
 import { userLogIn } from "./APIs";
+import { UserContext } from "./UserContext";
+import { userLogIn, getHome, userLogOut } from "./APIs";
 
-const signIn = ({navigation}) => {
-  const [username, setUsername] = React.useState("")
-  const [password, setPassword] = React.useState("")
-  const [loggingIn, setLoggingIn] = React.useState(false)
-  const [loggedIn, setLoggedIn] = React.useState(false)
-  const [user, setUser] = React.useState({})
+const signIn = ({ navigation }) => {
+  const [value, onChangeText] = React.useState("");
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [loggingIn, setLoggingIn] = React.useState(false);
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [user, setUser] = React.useState({});
 
   const googleSignIn = async () => {
     await WebBrowser.openBrowserAsync(
       `https://fog-of-war-auth.onrender.com/auth/google`
-    ).then(response => {
-      console.log(response)
+    ).then((response) => {
+      console.log(response);
     });
-  }
+  };
+
+  const handleLogOut = () => {
+    userLogOut().then(() => {
+      setLoggedIn(false);
+      setUser({});
+    });
+  };
 
   const handleClick = (e) => {
     e.preventDefault();
-    setLoggingIn(true);
-    setLoggedIn(false)
     userLogIn({
       username: username,
       password: password,
-    }).then(navigation.navigate('Home')).catch((err) => {
-      console.log(err)
-      return err;
-    });
-    setLoggedIn(true)
-    setLoggingIn(false)
+    })
+      .then((loggedInUser) => {
+        setLoggedIn(true);
+        console.log("logged in");
+      })
+      .catch((err) => {
+        console.log(err);
+        return err;
+      });
   };
 
   if (loggingIn) {
-    console.log("logging in...")
+    console.log("logging in...");
   }
 
   if (loggedIn) {
-    console.log("logged in!")
+    console.log("logged in!");
   }
 
-  console.log(user)
+  console.log(user);
+
+  React.useEffect(() => {
+    getHome().then((response) => {
+      console.log(response, "use effect");
+      if (response.loggedIn === true) {
+        setUser(response);
+      } else {
+      }
+    });
+  }, [loggedIn]);
+
+  if (user.loggedIn === true) {
+    return (
+      <View>
+        <Text>{user.display_name}</Text>
+        <Text>{user.username}</Text>
+        <Button style={styles.Buttons} mode="contained" onPress={handleLogOut}>
+          Log Out
+        </Button>
+      </View>
+    );
+  }
 
   return (
     <View>
@@ -65,7 +98,11 @@ const signIn = ({navigation}) => {
       <Button style={styles.Buttons} mode="contained" onPress={(e) => handleClick(e)}>
         Log In
       </Button>
-      <Button style={styles.Buttons} mode="Text" onPress={() => navigation.navigate('userRegistration')}>
+      <Button
+        style={styles.Buttons}
+        mode="Text"
+        onPress={() => navigation.navigate("userRegistration")}
+      >
         Sign Up
       </Button>
     </View>
