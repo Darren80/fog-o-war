@@ -38,17 +38,17 @@ const UserRegistration = () => {
   return (
     <>
       <TextInput
+        // style={styles.input}
+        value={username}
+        placeholder={"Email/Username"}
+        onChangeText={(text) => setUsername(text)}
+        autoCapitalize={"none"}
+      />
+      <TextInput
         // style={}
         value={displayName}
         placeholder={"Display Name"}
         onChangeText={(text) => setDisplayName(text)}
-      />
-      <TextInput
-        // style={styles.input}
-        value={username}
-        placeholder={"Email"}
-        onChangeText={(text) => setUsername(text)}
-        autoCapitalize={"none"}
       />
       <TextInput
         // style={}

@@ -2,12 +2,10 @@ import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
-import { userLogIn } from "./APIs";
 import { UserContext } from "./UserContext";
-import { userLogIn, getHome, userLogOut } from "./APIs";
+import { userLogIn, getHome} from "./APIs";
 
 const signIn = ({ navigation }) => {
-  const [value, onChangeText] = React.useState("");
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loggingIn, setLoggingIn] = React.useState(false);
@@ -22,12 +20,7 @@ const signIn = ({ navigation }) => {
     });
   };
 
-  const handleLogOut = () => {
-    userLogOut().then(() => {
-      setLoggedIn(false);
-      setUser({});
-    });
-  };
+  
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -35,7 +28,7 @@ const signIn = ({ navigation }) => {
       username: username,
       password: password,
     })
-      .then((loggedInUser) => {
+      .then(() => {
         setLoggedIn(true);
         console.log("logged in");
       })
@@ -66,13 +59,11 @@ const signIn = ({ navigation }) => {
   }, [loggedIn]);
 
   if (user.loggedIn === true) {
+    navigation.navigate('Profile')
     return (
       <View>
         <Text>{user.display_name}</Text>
         <Text>{user.username}</Text>
-        <Button style={styles.Buttons} mode="contained" onPress={handleLogOut}>
-          Log Out
-        </Button>
       </View>
     );
   }
@@ -83,7 +74,7 @@ const signIn = ({ navigation }) => {
         Log In With Google
       </Button>
       <TextInput
-        label="Email"
+        label="Email/Username"
         style={styles.textInput}
         value={username}
         onChangeText={(text) => setUsername(text)}

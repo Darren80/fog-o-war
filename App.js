@@ -25,6 +25,7 @@ const theme = {
 // class App extends React.Component {
 //   render() {
 const App = () => {
+  const [loggedIn, setLoggedIn] = React.useState()
   return (
     <PaperProvider theme={theme}>
       <NavigationContainer>
@@ -32,6 +33,8 @@ const App = () => {
           <Stack.Screen
             name="Home"
             component={home}
+            loggedIn={loggedIn}
+            setLoggedIn={setLoggedIn}
           />
           <Stack.Screen
             name="SignIn"
@@ -44,6 +47,8 @@ const App = () => {
           <Stack.Screen
             name="Profile"
             component={profile}
+            loggedIn={loggedIn}
+            setLoggedIn={setLoggedIn}
           />
         </Stack.Navigator>
       </NavigationContainer>

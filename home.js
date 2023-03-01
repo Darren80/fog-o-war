@@ -19,8 +19,7 @@ import { LocationAccuracy } from "expo-location";
 const api = new API();
 
 
-function home({ navigation }) {
-  const [loggedIn, setLoggedIn] = useState()
+function home({ navigation, loggedIn, setLoggedIn }) {
   const user = useContext(UserContext);
 
   const [username, setUsername] = useState(null);
