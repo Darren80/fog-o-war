@@ -115,10 +115,6 @@ function home({ navigation }) {
     
       if (checkUserWithinPolygon) {
 
-        console.log(markerLimit, '<-- markerLimit at beginning');
-        console.log(markerDeleteStatus, '<-- markerDeleteStatus');
-        console.log(imageAdded, '<-- imageAdded');
-        
         if(markerLimit < 3) {
 
           if(imageAdded === false) 
@@ -130,7 +126,6 @@ function home({ navigation }) {
               coords: markerPosition
             }]);
               setMarkerLimit((currLimit) => currLimit + 1);
-            console.log(markerLimit, '<-- markerLimit inside first');
           }
         
           else if(markerClicks > 1) {
@@ -142,8 +137,6 @@ function home({ navigation }) {
                   setMarkerLimit((currLimit) => currLimit + 1);
               }
               setImageAdded(false);
-              
-              console.log(markerLimit, '<-- markerLimit inside second');
             } 
         }
       else {
@@ -185,7 +178,6 @@ function home({ navigation }) {
     setMarkerDeleteStatus(true);
 
     setMarkerLimit((currMarkerLimit) => currMarkerLimit - 1);
-    console.log(markerLimit, '<-- markerLimit after deleting');
 
     const filteredMarkers = markers.filter((marker) => {
       return marker.coords !== removeMarker; 

@@ -77,7 +77,7 @@ export class TurfWorker {
     const  to = userPosition.geometry.coordinates;
 
     const options = {units: 'miles'};
-    
+
     const distance = turf.distance(from, to, options);
 
     return distance;
@@ -240,7 +240,7 @@ class TurfHelper {
   }
 
   _determineCircleSizeBasedOnElevation(userPosition) {
-    console.log('Altitude: ', userPosition.coords.altitude, 'Altitude Acc: ', userPosition.coords.altitudeAccuracy);
+    // console.log('Altitude: ', userPosition.coords.altitude, 'Altitude Acc: ', userPosition.coords.altitudeAccuracy);
   }
 
   //Input: None

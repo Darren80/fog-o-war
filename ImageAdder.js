@@ -45,7 +45,7 @@ export default function ImageAdder({ setImageAdded, setMarkers, imageAdded, setV
     if (!result.canceled) {
       setImageAdded(true);
           setMarkers((currMarker) => {
-            console.log(currMarker, '<-- marker inside open camera');
+
             const position = currMarker.length - 1;
 
             currMarker[position]['image'] = result.assets[0].uri;
@@ -56,7 +56,6 @@ export default function ImageAdder({ setImageAdded, setMarkers, imageAdded, setV
           setDeleteImage(result.assets[0].uri);
         }
     };
-    console.log(markers, '<-- marker outside open camera');
 
     const removeImage = () => {
       const filteredImage = markers.filter((marker) => {

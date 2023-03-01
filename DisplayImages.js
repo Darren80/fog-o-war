@@ -7,8 +7,6 @@ export default function DisplayImages ({ markers, setViewImage }) {
     const [enlargeImage, setEnlargeImage] = useState(false);
     const [imageSelected, setImageSelected] = useState(null);
 
-    console.log(markers[0].image, '<-- markers inside display images component');
-
     return (
         <View style={styles.container}>
             <ScrollView
