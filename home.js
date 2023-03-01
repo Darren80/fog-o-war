@@ -235,9 +235,9 @@ function home({ navigation }) {
                     {
                       clickMarker ?
                       (imageAdded ?
-                        // <ImageBackground source={require('./assets/marker.png')} style={{ height: 80, resizeMode: 'cover' }}>
+                        <ImageBackground source={require('./assets/marker.png')} style={{ height: 80, resizeMode: 'cover' }}>
                       <Image source={{ uri: marker.image }} style={{ width: 50, height: 50, borderRadius: 25, resizeMode: 'contain' }}/>
-                      // </ImageBackground>          
+                      </ImageBackground>          
                       :
                       <Image source={require('./assets/marker.gif')} style={{ height: 40, width: 30, resizeMode: 'contain' }}/>
                       )
