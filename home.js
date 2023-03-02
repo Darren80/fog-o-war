@@ -112,62 +112,61 @@ function home({ navigation, route }) {
     let distance = 0;
 
     markers.map((marker) => {
-      distance = turfWorker.distanceBetweenPoints(
-        marker.coords,
-        markerPosition
-      );
-    });
+      distance = turfWorker.distanceBetweenPoints(marker.coords, markerPosition);
+    })
 
     console.log(distance, "<-- distance");
-
-    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(
-      markerPosition,
-      fogPolygon
-    );
     console.log(checkUserWithinPolygon, "<-- checkUserWithinPolygon");
 
+    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, fogPolygon);
+
     if (checkUserWithinPolygon) {
-      if (markerLimit < 3 && distance < 0.5) {
+
+      if (markerLimit < 5 && distance < 0.5) {
+
+        if(markerDeleteStatus) {
+          setMarkerClicks((currmarkerClicks) => currmarkerClicks = 0);
+          setMarkerDeleteStatus(false);
+          setImageAdded(false);
+        }
+          
+
         if (imageAdded === false)
           setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
 
         if (markerClicks === 1) {
           setPointsWithinPolygon(true);
-          setMarkers([
-            ...markers,
-            {
-              coords: markerPosition,
-            },
-          ]);
+          setMarkers([...markers, {
+            coords: markerPosition
+          }]);
           setMarkerLimit((currLimit) => currLimit + 1);
-        } else if (markerClicks > 1) {
-          if (imageAdded || markerDeleteStatus) {
+        }
+
+        else if (markerClicks > 1) {
+          if (imageAdded) {
             setPointsWithinPolygon(true);
-            setMarkers([
-              ...markers,
-              {
-                coords: markerPosition,
-              },
-            ]);
+            setMarkers([...markers, {
+              coords: markerPosition
+            }]);
             setMarkerLimit((currLimit) => currLimit + 1);
           }
           setImageAdded(false);
         }
-      } else if (distance > 0.5) {
-        setImageAdded(false);
-        setMarkerLimit((currLimit) => (currLimit = 0));
-        setMarkerClicks((currmarkerClicks) => (currmarkerClicks = 2));
+      }
+      else if (distance > 0.5) {
+        setMarkerLimit((currLimit) => currLimit = 0);
+        setMarkerClicks((currmarkerClicks) => currmarkerClicks = 2);
         setPointsWithinPolygon(true);
-        setMarkers([
-          ...markers,
-          {
-            coords: markerPosition,
-          },
-        ]);
-        setMarkerLimit((currLimit) => currLimit + 1);
-      } else if (markerLimit <= 3)
-        alert("You have reached maximum number of markers!");
+        setMarkers([...markers, {
+          coords: markerPosition
+        }]);
+        setImageAdded(false);
+      }
+      else if (markerLimit <= 5)
+        alert('You have reached maximum number of markers!');
     }
+    else
+      setClickMarker(false);
   };
 
   //Runs once at the start of the program.
@@ -310,8 +309,11 @@ function home({ navigation, route }) {
           </Button>
         </ImageBackground>
       </View>
-    );
+    )
   }
+
+    
+  
 
   // if (locationErrorMessage) {
   //   return (
@@ -321,7 +323,6 @@ function home({ navigation, route }) {
   //   );
   // }
 
-  if (currentUserLocation) {
     const getCurrentElevation = (e) => {
       //Get current elevation according to GPS.
       Location.getCurrentPositionAsync({
@@ -598,7 +599,6 @@ function home({ navigation, route }) {
       );
     }
   }
-}
 
 const styles = StyleSheet.create({
   container: {
