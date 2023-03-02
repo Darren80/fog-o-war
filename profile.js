@@ -1,65 +1,76 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { StyleSheet, View, Image, ScrollView, LogBox } from 'react-native';
-import { useNavigation } from '@react-navigation/native'
-import { TextInput, Button, Surface, List, useTheme, Modal, Portal, Provider, Text, Menu, Dialog } from 'react-native-paper'
+import React, { useEffect, useState, useContext } from "react";
+import { StyleSheet, View, Image, ScrollView, LogBox } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import {
+  TextInput,
+  Button,
+  Surface,
+  List,
+  useTheme,
+  Modal,
+  Portal,
+  Provider,
+  Text,
+  Menu,
+  Dialog,
+} from "react-native-paper";
 
-import { deleteAllFog, getUserbyId, userLogOut } from './APIs'
+import { deleteAllFog, getUserbyId, userLogOut } from "./APIs";
 import { LoggedInContext, UserContext } from "./App";
-import center from '@turf/center';
+import center from "@turf/center";
 
 const profile = ({ route, navigation }) => {
-  const [profileURL, setProfileURL] = useState('https://avatars2.githubusercontent.com/u/24394918?s=400&v=4')
-  const [currentUserId, setCurrentUserID] = useState(3)
-  const [profileDisplayName, setDisplayName] = useState('')
-  const [profileUsername, setProfileUsername] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [profileURL, setProfileURL] = useState(
+    "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4"
+  );
+  const [currentUserId, setCurrentUserID] = useState(3);
+  const [profileDisplayName, setDisplayName] = useState("");
+  const [profileUsername, setProfileUsername] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const { user, setUser } = useContext(UserContext);
   const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
   const [loggingOut, setLoggingOut] = useState();
 
   const theme = useTheme();
-  const navigation = useNavigation()
 
   //console.log(navigation.getState(), "My navigation")
   //console.log(route.params, "My params")
 
-  LogBox.ignoreAllLogs()
+  LogBox.ignoreAllLogs();
 
-  const { mapSetter } = route.params
+  const { mapSetter } = route.params;
 
-  getUserbyId(currentUserId)
+  getUserbyId(currentUserId);
 
   useEffect(() => {
-    getUserbyId(currentUserId)
-      .then((data) => {
-        setProfileURL(data[0].avatar_url)
-        setDisplayName(data[0].display_name)
-        setProfileUsername(data[0].username)
-      })
-  }, [currentUserId])
-
+    getUserbyId(currentUserId).then((data) => {
+      setProfileURL(data[0].avatar_url);
+      setDisplayName(data[0].display_name);
+      setProfileUsername(data[0].username);
+    });
+  }, [currentUserId]);
 
   const onDeletePress = (user_id) => {
     //preventDefault()
-    setLoading(true)
+    setLoading(true);
     return deleteAllFog(user_id)
       .then(() => {
         const timeout = setTimeout(() => {
-          setLoading(false)
-          console.log(loading, "This was after the time out")
-        }, 5000)
+          setLoading(false);
+          console.log(loading, "This was after the time out");
+        }, 5000);
       })
       .catch((err) => {
-        console.log(err, "Our error")
-      })
-  }
+        console.log(err, "Our error");
+      });
+  };
 
   const [visible, setVisible] = React.useState(false);
 
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
-  const containerStyle = { backgroundColor: 'white', padding: 20 }
+  const containerStyle = { backgroundColor: "white", padding: 20 };
 
   // return (
   //   <View>
@@ -149,12 +160,12 @@ const profile = ({ route, navigation }) => {
   // )
 
   const handleLogOut = (e) => {
-    setLoggingOut(true)
+    setLoggingOut(true);
     e.preventDefault();
     userLogOut().then(() => {
       navigation.navigate("Home");
       setLoggedIn(false);
-      setLoggingOut(false)
+      setLoggingOut(false);
       setUser(null);
     });
   };
@@ -200,17 +211,19 @@ const profile = ({ route, navigation }) => {
         <List.Section title="Privacy" />
         <List.Section title="Preferences" />
         <List.Section title="About App" />
-        <Button style={styles.Buttons} mode="contained" onPress={(e) => handleLogOut(e)}>
+        <Button
+          style={styles.Buttons}
+          mode="contained"
+          onPress={(e) => handleLogOut(e)}
+        >
           Log Out
         </Button>
       </View>
     );
   } else {
-    return (
-      <Text>Something went wrong - please try again!</Text>
-    )
+    return <Text>Something went wrong - please try again!</Text>;
   }
-}
+};
 
 const styles = StyleSheet.create({
   profilePic: {
