@@ -42,11 +42,11 @@ export class TurfWorker {
 
     let result = false;
 
-    coordinatesArray.forEach((position) => {
+    coordinatesArray.forEach((position, i) => {
 
       //Return true if the user's position is inside the uncovered area
       const searchWithin = turf.booleanPointInPolygon(pointPosition, turf.polygon([position]));
-
+      console.log(searchWithin, coordinatesArray[i], i, '<-- index');
       if (searchWithin)
         result = true;
       else

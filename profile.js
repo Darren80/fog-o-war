@@ -94,6 +94,14 @@ const profile = ({route}) => {
                 {/* <Button style={{marginTop: 30, right: '35%'}} onPress={() => setVisible(true)}>
                     Delete History
                 </Button> */}
+                <List.Accordion title="Customize fog">
+                    <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
+                    <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
+                    <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
+                    <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
+                    <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
+                    <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
+                </List.Accordion>
                 
                 <List.Item
                 title='Share'
@@ -115,14 +123,7 @@ const profile = ({route}) => {
                 title='About App'
                 left={props=> <List.Icon icon="information-variant"/>}
                 />
-                <List.Accordion title="Customize fog">
-                    <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
-                    <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
-                    <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
-                    <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
-                    <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
-                    <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
-                </List.Accordion>
+                
                 <Button style={{marginTop: 10, right: '0%'}} onPre
                 ss={() => setVisible(true)}>
                     Delete History
