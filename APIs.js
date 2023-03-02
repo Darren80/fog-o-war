@@ -1,3 +1,4 @@
+// import CookieManager from "@react-native-cookies/cookies";
 import axios from "axios"
 import { Database } from "./MOCK DATABASE";
 const googleMapAPIKey = 'AIzaSyACUp2e0eMW5lbJIGx3CxmncPEv7ub99EM'
@@ -57,18 +58,22 @@ class API {
             })
     }
 
-    getUser = () => {
-        let get = {
-            display_name: 'nickname',
-            username: '',
-            avatar: ''
-        }
+    getUser = (email, password) => {
 
-        return this.axiosInstance.get(`/users/${this.username}`)
+
+
+        return this.axiosInstance.post(`/auth/login`)
             .then((response) => {
                 if (!response.status === 200) {
                     throw new Error("Error: " + response.status + response.statusText + response.data);
                 }
+
+                // CookieManager.setFromResponse(
+                //     response.config.url, // the URL of the response
+                //     response.headers['set-cookie']
+                // );
+
+                console.log(response.data, '<-- get user');
                 return response.data; //Returns username and user_id?
             })
     }
@@ -115,7 +120,7 @@ class API {
                 console.log(response.data, '<-- new marker');
             })
     }
-    
+
     deleteAllFog = (user_id) => {
         //Action cannot be reversed. Deletes all trips.
         return axios.delete(`/trips/${user_id}/geodata`)

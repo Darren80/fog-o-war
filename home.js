@@ -22,10 +22,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { State } from "react-native-gesture-handler";
 const api = new API();
 
-
 function home({ navigation, route }) {
+
   const [username, setUsername] = useState(null);
   const [userID, setUserID] = useState('1');
+  const [userObject, setUserObject] = useState(null);
+
   const turfWorker = new TurfWorker(userID);
 
   const [mapColour, setMapColour] = useState("rgba(218, 223, 225, 1)")
@@ -109,6 +111,11 @@ function home({ navigation, route }) {
       setSavePartialFogData(true);
     }, 10000);
 
+    // api.getUser('user', 'password')
+    // .then((user) => {
+    //   setUserObject(user);
+    // })
+
   }, [])
 
   //Runs every time the user's current location changes.
@@ -183,7 +190,7 @@ function home({ navigation, route }) {
 
     const markerPosition = e.nativeEvent.coordinate;
 
-    const distance = turfWorker.distanceBetweenPoints(markerPosition, currentUserPosition);
+    const distance = turfWorker.distanceBetweenPoints(markerPosition, currentUserLocation);
 
     console.log(distance, '<-- distance');
 
@@ -220,8 +227,6 @@ function home({ navigation, route }) {
         alert('You have reached maximum number of markers!');
       }
 
-
-
     }
   }
 
@@ -233,7 +238,7 @@ function home({ navigation, route }) {
   //   );
   // }
 
-  if (!currentUserPosition) {
+  if (currentUserLocation) {
     const getCurrentElevation = (e) => {
 
       //Get current elevation according to GPS.
@@ -276,7 +281,6 @@ function home({ navigation, route }) {
             setElevationButtonDisabled(false)
           }, 4000)
         })
-
     }
 
     const myPic = require('./images/speedometer.jpg');
@@ -291,7 +295,7 @@ function home({ navigation, route }) {
               </Card.Content>
               <Card.Cover source={{ uri: 'https://thumbs.dreamstime.com/b/speedometer-going-too-fast-11058210.jpg' }} />
             </Card>
-            : <Text>FASFAFAF</Text>}
+            : null}
         </View>
       )
     }
@@ -311,15 +315,6 @@ function home({ navigation, route }) {
         </View>
       );
     }
-
-    //TODO: Move this button to the profile page.
-    const ResetFogButton = () => {
-      <View style={styles.container}>
-        <Button onPress={requestPermissions} compact={true}>
-          Reset fog - Irreversible
-        </Button>
-      </View>
-    };
 
     const deleteMarker = () => {
 
@@ -471,60 +466,61 @@ function home({ navigation, route }) {
       );
     }
   }
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    map: {
-      width: "90%",
-      height: "90%",
-    },
-    button: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 32,
-      borderRadius: 4,
-      elevation: 3,
-      backgroundColor: 'black',
-    },
-    navButton: {
-      position: 'absolute',
-      alignItems: 'center',
-      justifyContent: 'center',
-      top: '20%',
-      left: '75%',
-      alignSelf: 'flex-end',
-      paddingHorizontal: 0
-    },
-    excessSpeedCard: {
-      position: 'absolute',
-      top: '25%',
-      left: '0%',
-    },
-    scoreButton: {
-      position: 'absolute',
-      alignItems: 'center',
-      justifyContent: 'center',
-      top: '15%',
-      left: '75%',
-      alignSelf: 'flex-end',
-      paddingHorizontal: 0
-    },
-    text: {
-      fontSize: 16,
-      lineHeight: 21,
-      fontWeight: 'bold',
-      letterSpacing: 0.25,
-      color: 'white',
-      width: "88%",
-      height: "88%"
-    }
-  })
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  map: {
+    width: "90%",
+    height: "90%",
+  },
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: 'black',
+  },
+  navButton: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '20%',
+    left: '75%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
+  },
+  excessSpeedCard: {
+    position: 'absolute',
+    top: '25%',
+    left: '0%',
+  },
+  scoreButton: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '15%',
+    left: '75%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
+  },
+  text: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: 'white',
+    width: "88%",
+    height: "88%"
+  }
+})
+
 
 export default home;
