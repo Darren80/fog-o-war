@@ -2,13 +2,16 @@ import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import { postNewUser } from "./APIs";
+import { LoggedInContext, UserContext } from "./App";
 
-const UserRegistration = () => {
+const userRegistration = ({navigation}) => {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [displayName, setDisplayName] = React.useState("");
   const [posting, setPosting] = React.useState(false);
   const [posted, setPosted] = React.useState(false);
+  const {user, setUser} = React.useContext(UserContext)
+  const {loggedIn, setLoggedIn} = React.useContext(LoggedInContext)
 
   const handleClick = (e) => {
     e.preventDefault();
@@ -18,6 +21,10 @@ const UserRegistration = () => {
       display_name: displayName,
       username: username,
       password: password,
+    }).then((newUser) => {
+      setUser(newUser)
+      setLoggedIn(true)
+      navigation.navigate("Home")
     }).catch((err) => {
       console.log(err)
       return err;
@@ -27,7 +34,7 @@ const UserRegistration = () => {
   };
 
   if (posting) {
-    console.log("Creating new profile...")
+    return <Text>Creating new user...</Text>
   }
 
   if (posted) {
@@ -62,4 +69,4 @@ const UserRegistration = () => {
   );
 };
 
-export default UserRegistration;
+export default userRegistration;

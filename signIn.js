@@ -2,35 +2,31 @@ import * as React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import * as WebBrowser from "expo-web-browser";
-import { UserContext } from "./UserContext";
-import { userLogIn, getHome} from "./APIs";
+import { userLogIn, getHome } from "./APIs";
+import { LoggedInContext, UserContext } from "./App";
 
 const signIn = ({ navigation }) => {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loggingIn, setLoggingIn] = React.useState(false);
-  const [loggedIn, setLoggedIn] = React.useState(false);
-  const [user, setUser] = React.useState({});
 
-  const googleSignIn = async () => {
-    await WebBrowser.openBrowserAsync(
-      `https://fog-of-war-auth.onrender.com/auth/google`
-    ).then((response) => {
-      console.log(response);
-    });
-  };
-
-  
+  const { user, setUser } = React.useContext(UserContext);
+  const {loggedIn, setLoggedIn} = React.useContext(LoggedInContext);
 
   const handleClick = (e) => {
     e.preventDefault();
-    userLogIn({
+    setLoggingIn(true)
+    setLoggedIn(false)
+    let loggedInUser =
+    {
       username: username,
       password: password,
-    })
+    }
+    userLogIn(loggedInUser)
       .then(() => {
+        setLoggingIn(false);
         setLoggedIn(true);
-        console.log("logged in");
+        navigation.navigate("Profile")
       })
       .catch((err) => {
         console.log(err);
@@ -46,33 +42,18 @@ const signIn = ({ navigation }) => {
     console.log("logged in!");
   }
 
-  console.log(user);
-
   React.useEffect(() => {
     getHome().then((response) => {
-      console.log(response, "use effect");
       if (response.loggedIn === true) {
         setUser(response);
-      } else {
+      } else if (response.loggedIn === false ) {
+        setLoggedIn(false);
       }
     });
-  }, [loggedIn]);
-
-  if (user.loggedIn === true) {
-    navigation.navigate('Profile')
-    return (
-      <View>
-        <Text>{user.display_name}</Text>
-        <Text>{user.username}</Text>
-      </View>
-    );
-  }
+  }, [setUser]);
 
   return (
     <View>
-      <Button style={styles.Buttons} mode="contained" onPress={googleSignIn}>
-        Log In With Google
-      </Button>
       <TextInput
         label="Email/Username"
         style={styles.textInput}
@@ -86,7 +67,11 @@ const signIn = ({ navigation }) => {
         secureTextEntry={true}
         onChangeText={(text) => setPassword(text)}
       />
-      <Button style={styles.Buttons} mode="contained" onPress={(e) => handleClick(e)}>
+      <Button
+        style={styles.Buttons}
+        mode="contained"
+        onPress={(e) => handleClick(e)}
+      >
         Log In
       </Button>
       <Button

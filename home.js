@@ -1,9 +1,7 @@
-import { useEffect, useState, useContext } from "react";
-import { UserContext } from './UserContext.js';
+import { useEffect, useState, useContext} from "react";
 
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
-import * as TaskManager from 'expo-task-manager';
 
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
@@ -16,12 +14,13 @@ import { requestPermissions } from "./locationPermissions";
 import { TurfWorker } from "./turf";
 import API from "./APIs";
 import { LocationAccuracy } from "expo-location";
+import { LoggedInContext, UserContext } from "./App";
 const api = new API();
 
 
-function home({ navigation, loggedIn, setLoggedIn }) {
-  const user = useContext(UserContext);
-
+function home({ navigation }) {
+  const { user, setUser } = useContext(UserContext);
+  const {loggedIn, setLoggedIn} = useContext(LoggedInContext)
   const [username, setUsername] = useState(null);
   const [userID, setUserID] = useState('test123');
   const turfWorker = new TurfWorker(userID);
@@ -256,7 +255,7 @@ function home({ navigation, loggedIn, setLoggedIn }) {
             iconColor={MD3Colors.error50}
             style={styles.navButton}
             size={40}
-            onPress={() => loggedIn == true ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+            onPress={() => loggedIn === true ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
           />
           <StatusBar style="auto" />
         </View>
