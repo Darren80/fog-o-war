@@ -2,6 +2,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { StyleSheet, Text, View, Pressable } from "react-native";
 
+import * as api from './APIs'
+
 export default function ImageAdder({ setImageAdded, setMarkers, imageAdded, setViewImage, markers }) {
 
   const [deleteImage, setDeleteImage] = useState(null);
@@ -23,8 +25,15 @@ export default function ImageAdder({ setImageAdded, setMarkers, imageAdded, setV
         const position = currMarker.length - 1;
 
         currMarker[position]['image'] = result.assets[0].uri;
+        
+        api.postNewMarker({
+          'img_url': result.assets[0].uri,
+          'location': [
+            currMarker[position].coords.longitude,
+            currMarker[position].coords.latitude
+          ]
+        })
         console.log(currMarker, '<-- currMarker');
-
         return currMarker;
       });
 
@@ -51,6 +60,13 @@ export default function ImageAdder({ setImageAdded, setMarkers, imageAdded, setV
 
         currMarker[position]['image'] = result.assets[0].uri;
 
+        api.postNewMarker({
+          'img_url': result.assets[0].uri,
+          'location': [
+            currMarker[position].coords.longitude,
+            currMarker[position].coords.latitude
+          ]
+        })
         return currMarker;
       });
 

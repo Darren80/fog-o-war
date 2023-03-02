@@ -78,6 +78,7 @@ function home({ navigation, route }) {
   const [removeMarker, setRemoveMarker] = useState(null);
   const [markerDeleteStatus, setMarkerDeleteStatus] = useState(false);
 
+
   const [viewImage, setViewImage] = useState(false);
 
   //Data to send via /trips/:trip_id
@@ -105,6 +106,7 @@ function home({ navigation, route }) {
   };
 
   const markerPositionSelected = (e) => {
+
     const markerPosition = e.nativeEvent.coordinate;
 
     let distance = 0;

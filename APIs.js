@@ -40,6 +40,28 @@ export async function userLogIn(userInfo) {
   });
 }
 
+export async function postNewMarker(markerData) {
+  //Format:
+  // let newMarker = {
+  //     "comment": "Loving the weather",
+  //     "img_url": "https://i.imgur.com/KT5sbOH.jpeg",
+  //     "user_id": 1,
+  //     "location": [
+  //         -75.1001345742366,
+  //         123.34633830198504
+  //     ]
+  // }
+
+  return this.axiosInstance.post(`/api/geodata/`, markerData).then((response) => {
+    if (!response.status === 200) {
+      throw new Error(
+        "Error: " + response.status + response.statusText + response.data
+      );
+    }
+    console.log(response.data, "<-- new marker");
+  });
+};
+
 class API {
   axiosInstance = axios.create({
     baseURL: "https://fog-of-war.onrender.com/api",
@@ -136,27 +158,7 @@ class API {
 
   //-------------------------- Markers --------------------------
 
-  postNewMarker = (markerData) => {
-    //Format:
-    // let newMarker = {
-    //     "comment": "Loving the weather",
-    //     "img_url": "https://i.imgur.com/KT5sbOH.jpeg",
-    //     "user_id": 1,
-    //     "location": [
-    //         -75.1001345742366,
-    //         123.34633830198504
-    //     ]
-    // }
 
-    this.axiosInstance.post(`/api/geodata/`, markerData).then((response) => {
-      if (!response.status === 200) {
-        throw new Error(
-          "Error: " + response.status + response.statusText + response.data
-        );
-      }
-      console.log(response.data, "<-- new marker");
-    });
-  };
 
   deleteAllFog = (user_id) => {
     //Action cannot be reversed. Deletes all trips.
