@@ -405,13 +405,13 @@ function home({ navigation, route }) {
       );
     };
 
-    if (locationErrorMessage) {
+    /*     if (locationErrorMessage) {
       return (
         <View style={styles.container}>
           <Text style={styles.paragraph}>Location not found</Text>
         </View>
       );
-    }
+    } */
 
     if (!currentUserLocation) {
       return (

@@ -26,7 +26,7 @@ const signIn = ({ navigation }) => {
         setLoggingIn(false);
         setLoggedIn(true);
         setUser(response.data);
-        navigation.navigate("Profile");
+        navigation.navigate("Home");
       })
       .catch((err) => {
         console.log(err);
