@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { StyleSheet, View, Image , ScrollView, LogBox} from 'react-native';
 import { useNavigation } from '@react-navigation/native'
-import { TextInput, Button, Surface, List, useTheme, Modal, Portal, Provider, Text} from 'react-native-paper'
+import { TextInput, Button, Surface, List, useTheme, Modal, Portal, Provider, Text, Menu, Dialog } from 'react-native-paper'
 import {deleteAllFog, getUserbyId} from './APIs'
+import center from '@turf/center';
 
 const profile = ({route}) => {
     const [profileURL, setProfileURL] = useState('https://avatars2.githubusercontent.com/u/24394918?s=400&v=4')
@@ -15,6 +16,8 @@ const profile = ({route}) => {
 
     //console.log(navigation.getState(), "My navigation")
     //console.log(route.params, "My params")
+
+    LogBox.ignoreAllLogs()
 
     const {mapSetter} = route.params
 
@@ -53,70 +56,88 @@ const profile = ({route}) => {
 
     return(
         <View>
-            <Surface elevation={5}>
-            <Image 
-                source={{uri: profileURL}}
-                style={styles.profilePic}
-            />
+            <Surface elevation={1} style={{margin:20}}>
+                <Image 
+                    source={{uri: profileURL}}
+                    style={{width:250, height:200, left:'10%', margin:10}}
+                    resizeMode='contain'
+                />
             </Surface>
-            <List.Item
-                title="User:"
-                //theme={theme}
-                //theme={styles.theme}
-                //theme={Primary40}
-                description={profileDisplayName}
-                left={props=> <List.Icon icon="human-non-binary"/>}
-            />
-            <List.Item
-                title="Profile's User Name:"
-                description={profileUsername}
-                left={props=> <List.Icon icon="emoticon-poop"/>}
-            />
-            <List.Item
-                title="History:"
-                description="45,000 (example?)"
-                left={props=> <List.Icon icon="airballoon"/>}
-            />
-            <List.Accordion title="Customize fog">
-                <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
-                <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
-                <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
-                <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
-                <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
-                <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
-            </List.Accordion>
-            <Button style={{marginTop: 30, right: '35%'}} onPress={() => setVisible(true)}>
-                Delete History
-            </Button>
-            
-            <List.Section
-            title='Share'
-            />
-            <List.Section
-            title='Invite Friends'
-            />
-            <List.Section
-            title='Privacy'
-            />
-            <List.Section
-            title='Preferences'
-            />
-            <List.Section
-            title='About App'
-            />
-            <Portal>
-                <Modal visible={visible} onDismiss={() => setVisible(false)} contentContainerStyle={containerStyle}>
-                    <Text>
-                        Are you certain you want to delete fog data? This operation cannot be undone
-                    </Text>
-                <Button disabled={loading === true} onPress={() => onDeletePress(currentUserId)}> Delete Fog Data</Button>
-                    <Text>
-                        Click outside this area to dismiss.
-                    </Text>
-                </Modal>
-            </Portal>
+            <Dialog.ScrollArea>
+                <ScrollView>
+                <List.Item
+                    title="User:"
+                    //theme={theme}
+                    //theme={styles.theme}
+                    //theme={Primary40}
+                    description={profileDisplayName}
+                    left={props=> <List.Icon icon="human-non-binary"/>}
+                />
+                <List.Item
+                    title="Profile's User Name:"
+                    description={profileUsername}
+                    left={props=> <List.Icon icon="emoticon-poop"/>}
+                />
+                <List.Item
+                    title="History:"
+                    description="45,646 meters"
+                    left={props=> <List.Icon icon="airballoon"/>}
+                />
+                {/* <List.Accordion title="Customize fog">
+                    <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
+                    <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
+                    <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
+                    <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
+                    <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
+                    <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
+                </List.Accordion> */}
+                {/* <Button style={{marginTop: 30, right: '35%'}} onPress={() => setVisible(true)}>
+                    Delete History
+                </Button> */}
+                
+                <List.Item
+                title='Share'
+                left={props=> <List.Icon icon="share-variant"/>}
+                />
+                <List.Item
+                title='Invite Friends'
+                left={props=> <List.Icon icon="offer"/>}
+                />
+                <List.Item
+                title='Privacy'
+                left={props=> <List.Icon icon="alpha-p"/>}
+                />
+                <List.Item
+                title='Preferences'
+                left={props=> <List.Icon icon="application-settings"/>}
+                />
+                <List.Item
+                title='About App'
+                left={props=> <List.Icon icon="information-variant"/>}
+                />
+                <List.Accordion title="Customize fog">
+                    <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
+                    <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
+                    <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
+                    <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
+                    <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
+                    <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
+                </List.Accordion>
+                <Button style={{marginTop: 10, right: '0%'}} onPre
+                ss={() => setVisible(true)}>
+                    Delete History
+                </Button>
+                <Portal>
+                    <Modal visible={visible} onDismiss={() => setVisible(false)} contentContainerStyle={containerStyle}>
+                        <Text style={{left:'20%'}}>
+                            This operation cannot be undone
+                        </Text>
+                    <Button disabled={loading === true} onPress={() => onDeletePress(currentUserId)}> Delete Fog Data</Button>
+                    </Modal>
+                </Portal>
+                </ScrollView>
+            </Dialog.ScrollArea>
         </View>
-        
     )
 }
 

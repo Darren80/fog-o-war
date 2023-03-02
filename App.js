@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, {useState} from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
@@ -28,7 +28,10 @@ const theme = {
 //   render() {
 const App = () => {
   //const [ mapColour, setMapColour ] = useState("rgba(218, 223, 225, 1)")
-
+  //console.ignoredYellowBox = ['Warning: ReactNative.createElement']
+  LogBox.ignoreAllLogs();
+  //console.disableYellowBox = true
+  
   return (
     <PaperProvider theme={theme}>
       <NavigationContainer>
