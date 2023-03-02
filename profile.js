@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
-import { StyleSheet, View, Image , ScrollView} from 'react-native';
+import { StyleSheet, View, Image , ScrollView, LogBox} from 'react-native';
 import { useNavigation } from '@react-navigation/native'
-import { TextInput, Button, Surface, List, useTheme, Modal, Portal, Provider, Text, Menu } from 'react-native-paper'
+import { TextInput, Button, Surface, List, useTheme, Modal, Portal, Provider, Text, Menu, Dialog } from 'react-native-paper'
 import {deleteAllFog, getUserbyId} from './APIs'
 import center from '@turf/center';
 
@@ -16,6 +16,8 @@ const profile = ({route}) => {
 
     //console.log(navigation.getState(), "My navigation")
     //console.log(route.params, "My params")
+
+    LogBox.ignoreAllLogs()
 
     const {mapSetter} = route.params
 
@@ -61,7 +63,8 @@ const profile = ({route}) => {
                     resizeMode='contain'
                 />
             </Surface>
-            <ScrollView>
+            <Dialog.ScrollArea>
+                <ScrollView>
                 <List.Item
                     title="User:"
                     //theme={theme}
@@ -132,9 +135,9 @@ const profile = ({route}) => {
                     <Button disabled={loading === true} onPress={() => onDeletePress(currentUserId)}> Delete Fog Data</Button>
                     </Modal>
                 </Portal>
-            </ScrollView>
+                </ScrollView>
+            </Dialog.ScrollArea>
         </View>
-        
     )
 }
 

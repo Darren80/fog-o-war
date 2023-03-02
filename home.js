@@ -4,7 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 import * as TaskManager from 'expo-task-manager';
 
-import { Pressable, StyleSheet, Text, View, Image } from "react-native";
+import { Pressable, StyleSheet, Text, View, Image, LogBox } from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
 import { IconButton, MD3Colors, Avatar, Button, Card, Title, Paragraph, ProgressBar } from 'react-native-paper'
@@ -49,6 +49,8 @@ function home({ navigation, route}) {
   const [savePartialFogData, setSavePartialFogData] = useState(false);
 
   //console.log(loadingPicture, "matts loading picture")
+
+  
 
   //Markers
   const [markers, setMarkers] = useState([]);
