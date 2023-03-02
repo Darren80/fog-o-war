@@ -1,9 +1,17 @@
 import { useEffect, useState, useContext } from "react";
+import splash from "./assets/splash.webp";
 
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
 
-import { Pressable, StyleSheet, Text, View, Image } from "react-native";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ImageBackground,
+} from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
 import { IconButton, MD3Colors, Avatar, Button } from "react-native-paper";
@@ -176,19 +184,25 @@ function home({ navigation }) {
 
   const handleClick = (e) => {
     e.preventDefault();
-    navigation.navigate("SignIn");
+    navigation.navigate("Sign In");
   };
 
   if (loggedIn === false) {
     return (
       <View>
-        <Button
-          style={styles.Buttons}
-          mode="contained"
-          onPress={(e) => handleClick(e)}
+        <ImageBackground
+          source={splash}
+          resizeMode="cover"
+          style={{ minHeight: "100%" }}
         >
-          Please log in
-        </Button>
+          <Button
+            style={styles.Buttons}
+            mode="contained"
+            onPress={(e) => handleClick(e)}
+          >
+            Please log in
+          </Button>
+        </ImageBackground>
       </View>
     );
   }
@@ -291,7 +305,7 @@ function home({ navigation }) {
             onPress={() =>
               loggedIn === true
                 ? navigation.navigate("Profile")
-                : navigation.navigate("SignIn")
+                : navigation.navigate("Sign In")
             }
           />
           <StatusBar style="auto" />
@@ -345,7 +359,7 @@ const styles = StyleSheet.create({
   },
   Buttons: {
     width: 200,
-    top: "40%",
+    top: "80%",
     margin: 5,
     alignItems: "center",
     left: "25%",

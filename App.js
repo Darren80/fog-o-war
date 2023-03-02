@@ -51,7 +51,7 @@ const App = () => {
             <Stack.Navigator>
               <Stack.Screen name="Home" component={home} />
               <Stack.Screen
-                name="SignIn"
+                name="Sign In"
                 component={signIn}
                 options={{
                   headerLeft: null,
