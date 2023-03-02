@@ -470,7 +470,6 @@ function home({ navigation, route }) {
     if (currentUserLocation) {
       return (
         <View style={styles.container}>
-          <Text>Fog-Of-War</Text>
           {viewImage ? (
             <DisplayImages markers={markers} setViewImage={setViewImage} />
           ) : (
@@ -621,11 +620,12 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
   },
   navButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    top: "5%",
-    left: "64%",
+    top: "3%",
+    left: "70%",
     alignSelf: "flex-end",
     paddingHorizontal: 0,
   },
@@ -635,11 +635,12 @@ const styles = StyleSheet.create({
     left: "0%",
   },
   scoreButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    top: "5%",
-    left: "47%",
+    top: "3%",
+    left: "55%",
     alignSelf: "flex-end",
     paddingHorizontal: 0,
   },
