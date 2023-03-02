@@ -1,21 +1,20 @@
-import 'react-native-gesture-handler';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, LogBox } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
+import "react-native-gesture-handler";
+import React, { useState } from "react";
+import { StyleSheet, Text, View, LogBox } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { Provider as PaperProvider, MD3LightTheme } from "react-native-paper";
 import { getHome } from "./APIs";
 
 export const UserContext = React.createContext();
 export const LoggedInContext = React.createContext(false);
 
 const Stack = createStackNavigator();
-import signIn from './signIn.js'
-import home from './home.js'
-import profile from './profile.js'
-import scoreboard from './scoreboard'
+import signIn from "./signIn.js";
+import home from "./home.js";
+import profile from "./profile.js";
+import scoreboard from "./scoreboard";
 import userRegistration from "./userRegistration.js";
-
 
 const theme = {
   ...MD3LightTheme, // or MD3DarkTheme
@@ -29,7 +28,7 @@ const theme = {
 };
 
 const App = () => {
-  const [user, setUser] = React.useState();
+  const [user, setUser] = React.useState({ user_id: 0 });
   const [loggedIn, setLoggedIn] = React.useState();
 
   LogBox.ignoreAllLogs();
@@ -54,18 +53,18 @@ const App = () => {
           <NavigationContainer>
             <Stack.Navigator>
               <Stack.Screen
-              name="Home"
-              component={home}
-              options={{
-                headerShown: false
-              }}
+                name="Home"
+                component={home}
+                options={{
+                  headerShown: false,
+                }}
               />
               <Stack.Screen
                 name="Sign In"
                 component={signIn}
                 options={{
                   headerLeft: null,
-                  headerShown: false
+                  headerShown: false,
                 }}
               />
               <Stack.Screen
@@ -79,11 +78,7 @@ const App = () => {
                   headerLeft: null,
                 }}
               />
-            <Stack.Screen
-            name="Scoreboard"
-            component={scoreboard}
-
-          />
+              <Stack.Screen name="Scoreboard" component={scoreboard} />
             </Stack.Navigator>
           </NavigationContainer>
         </PaperProvider>

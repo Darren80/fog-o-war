@@ -39,7 +39,7 @@ const profile = ({ route, navigation }) => {
 
   LogBox.ignoreAllLogs();
 
-  const { mapSetter } = route.params;
+  /* const { mapSetter } = route.params; */
 
   getUserbyId(currentUserId);
 
