@@ -200,7 +200,11 @@ function home({ navigation, route }) {
 
     const markerPosition = e.nativeEvent.coordinate;
 
-    const distance = turfWorker.distanceBetweenPoints(markerPosition, currentUserLocation);
+    let distance = 0;
+
+    markers.map((marker) => {
+      distance = turfWorker.distanceBetweenPoints(marker.coords, markerPosition);
+    })
 
     console.log(distance, '<-- distance');
 
@@ -209,36 +213,45 @@ function home({ navigation, route }) {
 
     if (checkUserWithinPolygon) {
 
-      if (markerLimit < 3) {
+        if(markerLimit < 3 && distance < 0.5) {
+ 
+          if(imageAdded === false) 
+            setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
 
-        if (imageAdded === false)
-          setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
+            if(markerClicks === 1) {
+              setPointsWithinPolygon(true);
+              setMarkers([...markers, {
+                coords: markerPosition
+              }]);
+                setMarkerLimit((currLimit) => currLimit + 1);
+            }
 
-        if (markerClicks === 1) {
-          setPointsWithinPolygon(true);
-          setMarkers([...markers, {
-            coords: markerPosition
-          }]);
-          setMarkerLimit((currLimit) => currLimit + 1);
-        }
-
-        else if (markerClicks > 1) {
-          if (imageAdded || markerDeleteStatus) {
+            else if(markerClicks > 1) {
+                if(imageAdded || markerDeleteStatus) {
+                    setPointsWithinPolygon(true);
+                    setMarkers([...markers, {
+                      coords: markerPosition
+                      }]);
+                        setMarkerLimit((currLimit) => currLimit + 1);
+                    }
+                      setImageAdded(false);
+              } 
+            }
+          else if(distance > 0.5)
+          {
+            setImageAdded(false);
+            setMarkerLimit((currLimit) => currLimit = 0);
+            setMarkerClicks((currmarkerClicks) => currmarkerClicks = 2);
             setPointsWithinPolygon(true);
             setMarkers([...markers, {
               coords: markerPosition
             }]);
-            setMarkerLimit((currLimit) => currLimit + 1);
+              setMarkerLimit((currLimit) => currLimit + 1); 
           }
-          setImageAdded(false);
-        }
+          else if (markerLimit <= 3)
+          alert('You have reached maximum number of markers!');
       }
-      else {
-        alert('You have reached maximum number of markers!');
-      }
-
-    }
-  }
+}
 
   // if (locationErrorMessage) {
   //   return (
@@ -332,11 +345,12 @@ function home({ navigation, route }) {
 
       setMarkerLimit((currMarkerLimit) => currMarkerLimit - 1);
 
-      const filteredMarkers = markers.filter((marker) => {
-        return marker.coords !== removeMarker;
-      })
-      setMarkers(filteredMarkers);
-    }
+    const filteredMarkers = markers.filter((marker) => {
+      return marker.coords !== removeMarker; 
+    })
+    setMarkers(filteredMarkers);
+    setClickMarker(false);
+  }
 
     //TODO: Put button at bottom of map.
     // const ElevationButton = () => (
@@ -422,29 +436,29 @@ function home({ navigation, route }) {
                       strokeWidth={4}
                     >
 
-                    </Geojson>
-                    : null
-                }
-              </MapView>
+              </Geojson>
+              : null
           }
+        </MapView>
+  }
+            {
+          clickMarker ? null :
           <ElevationButton />
-
-            <View style={styles.navButton}>
-              <IconButton
-                icon='account-circle'
-                //iconColor={MD3Colors.error50}
-                //style={styles.navButton}
-                size={40}
-                onPress={() => loggedIn ? navigation.navigate('Profile',  {'mapSetter' : setMapColour}) : navigation.navigate('SignIn')}
-                // onPress={() => {if (loggedIn){
-                //    navigation.navigate('Profile', {'mapSetter' : setMapColour}) 
-                //    //navigation.setState(setMapColour)
-                //   } else {navigation.navigate('SignIn')
-                // }}}
-              />
-              <StatusBar style="auto" />
-            </View>
-            <View style={styles.scoreButton}>
+        }
+        {
+          viewImage ? null :
+          <>
+                  <View style={styles.navButton}>
+          <IconButton
+            icon='account-circle'
+            iconColor={MD3Colors.error50}
+            style={styles.navButton}
+            size={40}
+            onPress={() => loggedIn ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+          />
+          <StatusBar style="auto" />
+        </View>
+        <View style={styles.scoreButton}>
               <IconButton
                 icon='arrow-projectile-multiple'
                 iconColor={MD3Colors.error50}
@@ -454,20 +468,26 @@ function home({ navigation, route }) {
               />
               <StatusBar style="auto" />
             </View>
+          </>
+        }
 
-          {
-            viewImage ?
-              null :
-              (clickMarker ?
-                <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} imageAdded={imageAdded} setViewImage={setViewImage} markers={markers} /> : null)
-          }
-          {
-            clickMarker ?
-              <Pressable style={styles.deleteButton} onPress={deleteMarker}>
-                <Text style={styles.text}>Remove Marker</Text>
-              </Pressable> : null
 
-          }
+        {
+          viewImage ?
+          null : 
+          (clickMarker ?
+            <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} imageAdded={imageAdded} setViewImage={setViewImage} markers={markers}/> : null)
+        }
+        {
+          viewImage ? null :
+          loggedIn ?
+          (clickMarker ?
+          <Pressable style={styles.appButtonContainer} onPress={deleteMarker}>
+            <Text style={styles.appButtonText}>Remove Marker</Text>
+          </Pressable> : null)
+          : null
+       
+        }
 
         </View>
       );
@@ -535,6 +555,24 @@ const styles = StyleSheet.create({
     left: '47%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
+  },
+  appButtonContainer: {
+    elevation: 5,
+    backgroundColor: "#009688",
+    borderRadius: 10,
+    paddingVertical: 7.5,
+    paddingHorizontal: 7.5,
+    marginHorizontal: 4,
+    marginBottom: 4,
+    marginTop: 4,
+    width: '40%'
+  },
+  appButtonText: {
+    fontSize: 10,
+    color: "#fff",
+    fontWeight: "bold",
+    alignSelf: "center",
+    textTransform: "uppercase"
   }
 })
 

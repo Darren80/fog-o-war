@@ -71,20 +71,20 @@ export default function ImageAdder({ setImageAdded, setMarkers, imageAdded, setV
       {
         imageAdded ?
           <View style={styles.buttonContainer}>
-            <Pressable style={styles.button} onPress={removeImage}>
-              <Text style={styles.text}>Remove Image</Text>
+            <Pressable style={styles.appButtonContainer} onPress={removeImage}>
+              <Text style={styles.appButtonText}>Remove Image</Text>
             </Pressable>
-            <Pressable style={styles.button} onPress={() => setViewImage(true)}>
-              <Text style={styles.text}>View Image</Text>
+            <Pressable style={styles.appButtonContainer} onPress={() => setViewImage(true)}>
+              <Text style={styles.appButtonText}>View Image</Text>
             </Pressable>
           </View>
           :
           <View style={styles.buttonContainer}>
-            <Pressable style={styles.button} onPress={pickImage}>
-              <Text style={styles.text}>Pick Image</Text>
+            <Pressable style={styles.appButtonContainer} onPress={pickImage}>
+              <Text style={styles.appButtonText}>Pick Image</Text>
             </Pressable>
-            <Pressable style={styles.button} onPress={openCamera}>
-              <Text style={styles.text}>Open Camera</Text>
+            <Pressable style={styles.appButtonContainer} onPress={openCamera}>
+              <Text style={styles.appButtonText}>Open Camera</Text>
             </Pressable>
           </View>
       }
@@ -117,6 +117,24 @@ const styles = StyleSheet.create({
     letterSpacing: 0.25,
     alignSelf: 'center',
     color: 'white',
+  },
+  appButtonContainer: {
+    elevation: 5,
+    backgroundColor: "#009688",
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 7,
+    marginHorizontal: 4,
+    marginBottom: 6,
+    marginTop: 5,
+    width: '40%'
+  },
+  appButtonText: {
+    fontSize: 10,
+    color: "#fff",
+    fontWeight: "bold",
+    alignSelf: "center",
+    textTransform: "uppercase"
   }
 });
 
