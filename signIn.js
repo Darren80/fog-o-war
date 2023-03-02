@@ -26,7 +26,7 @@ const signIn = ({ navigation }) => {
         setLoggingIn(false);
         setLoggedIn(true);
         setUser(response.data);
-        navigation.navigate("Profile");
+        navigation.navigate("Home");
       })
       .catch((err) => {
         console.log(err);
@@ -90,7 +90,10 @@ const styles = StyleSheet.create({
     mode: "outlined",
     height: 50,
     width: 340,
-    margin: 20,
+    marginTop: 10,
+    marginBottom: 10,
+    marginRight: "auto",
+    marginLeft: "auto",
     borderWidth: 2,
     padding: -20,
     top: "40%",

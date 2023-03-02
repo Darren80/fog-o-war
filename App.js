@@ -44,7 +44,7 @@ const App = () => {
         setLoggedIn(false);
       }
     });
-  }, []);
+  }, [loggedIn]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>
@@ -71,13 +71,7 @@ const App = () => {
                 name="userRegistration"
                 component={userRegistration}
               />
-              <Stack.Screen
-                name="Profile"
-                component={profile}
-                options={{
-                  headerLeft: null,
-                }}
-              />
+              <Stack.Screen name="Profile" component={profile} />
               <Stack.Screen name="Scoreboard" component={scoreboard} />
             </Stack.Navigator>
           </NavigationContainer>
