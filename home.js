@@ -420,8 +420,9 @@ function home({ navigation, route }) {
           <ElevationButton />
 
           <View style={styles.navButton}>
+
             <IconButton
-              icon='account'
+              icon='account-circle'
               iconColor={MD3Colors.error50}
               //style={styles.navButton}
               size={40}
@@ -432,21 +433,22 @@ function home({ navigation, route }) {
             //    //navigation.setState(setMapColour)
             //   } else {navigation.navigate('SignIn')
             // }}}
-            />
-            <StatusBar style="auto" />
-          </View>
-          <View style={styles.scoreButton}>
-            <IconButton
-              icon='arrow-projectile-multiple'
-              //iconColor={MD3Colors.error50}
-              style={styles.scoreButton}
-              size={40}
-              onPress={() => navigation.navigate('Scoreboard')}
-            />
-            <StatusBar style="auto" />
-          </View>
+          />
 
-          <ExcessSpeedCard />
+          <StatusBar style="auto" />
+
+        </View>
+        
+        <View style={styles.scoreButton}>
+          <IconButton
+            icon='arrow-projectile-multiple'
+            iconColor={MD3Colors.error50}
+            style={styles.scoreButton}
+            size={40}
+            onPress={() => navigation.navigate('Scoreboard')}
+          />
+          <StatusBar style="auto" />
+        </View>
 
           {
             viewImage ?
@@ -492,8 +494,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    top: '20%',
-    left: '75%',
+    top: '5%',
+    left: '64%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
   },
@@ -506,8 +508,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    top: '15%',
-    left: '75%',
+    top: '5%',
+    left: '47%',
     alignSelf: 'flex-end',
     paddingHorizontal: 0
   },
@@ -519,6 +521,15 @@ const styles = StyleSheet.create({
     color: 'white',
     width: "88%",
     height: "88%"
+  },
+  fogTitle: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: '100%',
+    left: '47%',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 0
   }
 })
 
