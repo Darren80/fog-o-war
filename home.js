@@ -48,7 +48,7 @@ function home({ navigation, route }) {
   const [mapColour, setMapColour] = useState("rgba(218, 223, 225, 1)");
   const [loading, setLoading] = useState(true);
 
-  const turfWorker = new TurfWorker(user.user_id || null);
+  const turfWorker = new TurfWorker(user ? user.user_id : 0);
 
   const [currentUserLocation, setCurrentUserLocation] = useState(null);
 
@@ -222,7 +222,7 @@ function home({ navigation, route }) {
     // .then((user) => {
     //   setUserObject(user);
     // })
-  }, [user]);
+  }, [loggedIn]);
 
   //Runs every time the user's current location changes.
   useEffect(() => {
@@ -408,7 +408,7 @@ function home({ navigation, route }) {
     if (locationErrorMessage) {
       return (
         <View style={styles.container}>
-          <Text style={styles.paragraph}>{errorMsg}</Text>
+          <Text style={styles.paragraph}>Location not found</Text>
         </View>
       );
     }
