@@ -112,51 +112,56 @@ function home({ navigation }) {
       distance = turfWorker.distanceBetweenPoints(marker.coords, markerPosition);
     })
 
-    console.log(distance, '<-- distance');
-
     const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, fogPolygon);
 
-      if (checkUserWithinPolygon) {
+    if (checkUserWithinPolygon) {
 
-        if(markerLimit < 3 && distance < 0.5) {
- 
-          if(imageAdded === false) 
-            setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
+      if (markerLimit < 5 && distance < 0.5) {
 
-            if(markerClicks === 1) {
-              setPointsWithinPolygon(true);
-              setMarkers([...markers, {
-                coords: markerPosition
-              }]);
-                setMarkerLimit((currLimit) => currLimit + 1);
-            }
+        if(markerDeleteStatus) {
+          setMarkerClicks((currmarkerClicks) => currmarkerClicks = 0);
+          setMarkerDeleteStatus(false);
+          setImageAdded(false);
+        }
+          
 
-            else if(markerClicks > 1) {
-                if(imageAdded || markerDeleteStatus) {
-                    setPointsWithinPolygon(true);
-                    setMarkers([...markers, {
-                      coords: markerPosition
-                      }]);
-                        setMarkerLimit((currLimit) => currLimit + 1);
-                    }
-                      setImageAdded(false);
-              } 
-            }
-          else if(distance > 0.5)
-          {
-            setImageAdded(false);
-            setMarkerLimit((currLimit) => currLimit = 0);
-            setMarkerClicks((currmarkerClicks) => currmarkerClicks = 2);
+        if (imageAdded === false)
+          setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
+
+        if (markerClicks === 1) {
+          setPointsWithinPolygon(true);
+          setMarkers([...markers, {
+            coords: markerPosition
+          }]);
+          setMarkerLimit((currLimit) => currLimit + 1);
+        }
+
+        else if (markerClicks > 1) {
+          if (imageAdded) {
             setPointsWithinPolygon(true);
             setMarkers([...markers, {
               coords: markerPosition
             }]);
-              setMarkerLimit((currLimit) => currLimit + 1); 
+            setMarkerLimit((currLimit) => currLimit + 1);
           }
-          else if (markerLimit <= 3)
-          alert('You have reached maximum number of markers!');
+          setImageAdded(false);
+        }
       }
-}
+      else if (distance > 0.5) {
+        setMarkerLimit((currLimit) => currLimit = 0);
+        setMarkerClicks((currmarkerClicks) => currmarkerClicks = 2);
+        setPointsWithinPolygon(true);
+        setMarkers([...markers, {
+          coords: markerPosition
+        }]);
+        setImageAdded(false);
+      }
+      else if (markerLimit <= 5)
+        alert('You have reached maximum number of markers!');
+    }
+    else
+      setClickMarker(false);
+  }
 
   // if (locationErrorMessage) {
   //   return (
