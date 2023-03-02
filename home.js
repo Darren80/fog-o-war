@@ -476,6 +476,7 @@ function home({ navigation, route }) {
                 }
               </MapView>
           }
+          <ExcessSpeedCard />
           {
             clickMarker ? null :
               <ElevationButton />
