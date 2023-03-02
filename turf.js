@@ -42,32 +42,37 @@ export class TurfWorker {
 
     let result = false;
 
-    coordinatesArray.forEach((position, i) => {
+    for (let i = 1; i < coordinatesArray.length; i++) {
 
+      const position = coordinatesArray[i];
       //Return true if the user's position is inside the uncovered area
       const searchWithin = turf.booleanPointInPolygon(pointPosition, turf.polygon([position]));
-      console.log(searchWithin, coordinatesArray[i], i, '<-- index');
-      if (searchWithin)
+
+      if (searchWithin) {
+        console.log(searchWithin, '<-- search within');
         result = true;
+        break;
+      }
       else
         result = false;
-    });
+
+    }
 
     return result;
 
   }
 
   distanceBetweenPoints(markerPoint, previousMarkerLocation) {
-    
+
     const pointPosition = turf.point([markerPoint.longitude, markerPoint.latitude]);
 
     const from = pointPosition.geometry.coordinates;
 
     const lastPosition = turf.point([previousMarkerLocation.longitude, previousMarkerLocation.latitude]);
 
-    const  to = lastPosition.geometry.coordinates;
+    const to = lastPosition.geometry.coordinates;
 
-    const options = {units: 'kilometers'};
+    const options = { units: 'kilometers' };
 
     const distance = turf.distance(from, to, options);
 
@@ -239,7 +244,7 @@ export class TurfWorker {
       // console.log(fogPolygon.geometry.coordinates.length, '<-- length of FP');
     }
 
-    
+
     return fogPolygon;
   }
 

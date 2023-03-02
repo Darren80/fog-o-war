@@ -98,7 +98,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-end',
-    marginLeft: 10
+    marginLeft: 10,
+
+    position: 'absolute',
+    bottom: '7%'
   },
   button: {
     width: '40%',

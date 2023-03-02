@@ -32,9 +32,9 @@ function home({ navigation, route }) {
 
   const turfWorker = new TurfWorker(userID);
 
-  const [ mapColour, setMapColour ] = useState("rgba(218, 223, 225, 1)")
+  const [mapColour, setMapColour] = useState("rgba(218, 223, 225, 1)")
 
-  const [ loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
 
   const [currentUserLocation, setCurrentUserLocation] = useState(null);
 
@@ -47,7 +47,7 @@ function home({ navigation, route }) {
 
   const [elevationButtonText, setElevationButtonText] = useState('Reveal fog based on elevation');
   const [elevationButtonDisabled, setElevationButtonDisabled] = useState(false);
-  const [maxSpeed, setMaxSpeed] = useState(20); //in mph
+  const [maxSpeed, setMaxSpeed] = useState(999); //in mph
 
   const [showExcessSpeed, setShowExcessSpeed] = useState(false);
 
@@ -55,7 +55,7 @@ function home({ navigation, route }) {
 
   //console.log(loadingPicture, "matts loading picture")
 
-  
+
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -72,7 +72,7 @@ function home({ navigation, route }) {
   //Data to send via /trips/:trip_id
   const [partialFogData, setPartialFogData] = useState(null);
 
-  
+
 
   //Runs once at the start of the program.
   useEffect(() => {
@@ -209,49 +209,48 @@ function home({ navigation, route }) {
     console.log(distance, '<-- distance');
 
     const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, fogPolygon);
-
+    console.log(checkUserWithinPolygon, '<-- checkUserWithinPolygon');
 
     if (checkUserWithinPolygon) {
 
-        if(markerLimit < 3 && distance < 0.5) {
- 
-          if(imageAdded === false) 
-            setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
+      if (markerLimit < 3 && distance < 0.5) {
 
-            if(markerClicks === 1) {
-              setPointsWithinPolygon(true);
-              setMarkers([...markers, {
-                coords: markerPosition
-              }]);
-                setMarkerLimit((currLimit) => currLimit + 1);
-            }
+        if (imageAdded === false)
+          setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
 
-            else if(markerClicks > 1) {
-                if(imageAdded || markerDeleteStatus) {
-                    setPointsWithinPolygon(true);
-                    setMarkers([...markers, {
-                      coords: markerPosition
-                      }]);
-                        setMarkerLimit((currLimit) => currLimit + 1);
-                    }
-                      setImageAdded(false);
-              } 
-            }
-          else if(distance > 0.5)
-          {
-            setImageAdded(false);
-            setMarkerLimit((currLimit) => currLimit = 0);
-            setMarkerClicks((currmarkerClicks) => currmarkerClicks = 2);
+        if (markerClicks === 1) {
+          setPointsWithinPolygon(true);
+          setMarkers([...markers, {
+            coords: markerPosition
+          }]);
+          setMarkerLimit((currLimit) => currLimit + 1);
+        }
+
+        else if (markerClicks > 1) {
+          if (imageAdded || markerDeleteStatus) {
             setPointsWithinPolygon(true);
             setMarkers([...markers, {
               coords: markerPosition
             }]);
-              setMarkerLimit((currLimit) => currLimit + 1); 
+            setMarkerLimit((currLimit) => currLimit + 1);
           }
-          else if (markerLimit <= 3)
-          alert('You have reached maximum number of markers!');
+          setImageAdded(false);
+        }
       }
-}
+      else if (distance > 0.5) {
+        setImageAdded(false);
+        setMarkerLimit((currLimit) => currLimit = 0);
+        setMarkerClicks((currmarkerClicks) => currmarkerClicks = 2);
+        setPointsWithinPolygon(true);
+        setMarkers([...markers, {
+          coords: markerPosition
+        }]);
+        setMarkerLimit((currLimit) => currLimit + 1);
+      }
+      else if (markerLimit <= 3)
+        alert('You have reached maximum number of markers!');
+    }
+  }
 
   // if (locationErrorMessage) {
   //   return (
@@ -331,13 +330,13 @@ function home({ navigation, route }) {
       );
     }
 
-  if (!currentUserLocation) {
-    return (
-      <View style={styles.container}>
-        <Image style={{width: 400, height: 845,}} source={{uri: 'https://images.unsplash.com/photo-1540844775339-de8c67e13da4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=776&q=80' }}/>
-      </View>
-    );
-  }
+    if (!currentUserLocation) {
+      return (
+        <View style={styles.container}>
+          <Image style={{ width: 400, height: 845, }} source={{ uri: 'https://images.unsplash.com/photo-1540844775339-de8c67e13da4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=776&q=80' }} />
+        </View>
+      );
+    }
 
     const deleteMarker = () => {
 
@@ -345,12 +344,12 @@ function home({ navigation, route }) {
 
       setMarkerLimit((currMarkerLimit) => currMarkerLimit - 1);
 
-    const filteredMarkers = markers.filter((marker) => {
-      return marker.coords !== removeMarker; 
-    })
-    setMarkers(filteredMarkers);
-    setClickMarker(false);
-  }
+      const filteredMarkers = markers.filter((marker) => {
+        return marker.coords !== removeMarker;
+      })
+      setMarkers(filteredMarkers);
+      setClickMarker(false);
+    }
 
     //TODO: Put button at bottom of map.
     // const ElevationButton = () => (
@@ -436,58 +435,58 @@ function home({ navigation, route }) {
                       strokeWidth={4}
                     >
 
-              </Geojson>
-              : null
+                    </Geojson>
+                    : null
+                }
+              </MapView>
           }
-        </MapView>
-  }
-            {
-          clickMarker ? null :
-          <ElevationButton />
-        }
-        {
-          viewImage ? null :
-          <>
-                  <View style={styles.navButton}>
-          <IconButton
-            icon='account-circle'
-            iconColor={MD3Colors.error50}
-            style={styles.navButton}
-            size={40}
-            onPress={() => loggedIn ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
-          />
-          <StatusBar style="auto" />
-        </View>
-        <View style={styles.scoreButton}>
-              <IconButton
-                icon='arrow-projectile-multiple'
-                iconColor={MD3Colors.error50}
-                style={styles.scoreButton}
-                size={40}
-                onPress={() => navigation.navigate('Scoreboard')}
-              />
-              <StatusBar style="auto" />
-            </View>
-          </>
-        }
+          {
+            clickMarker ? null :
+              <ElevationButton />
+          }
+          {
+            viewImage ? null :
+              <>
+                <View style={styles.navButton}>
+                  <IconButton
+                    icon='account-circle'
+                    iconColor={MD3Colors.error50}
+                    style={styles.navButton}
+                    size={40}
+                    onPress={() => loggedIn ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+                  />
+                  <StatusBar style="auto" />
+                </View>
+                <View style={styles.scoreButton}>
+                  <IconButton
+                    icon='arrow-projectile-multiple'
+                    iconColor={MD3Colors.error50}
+                    style={styles.scoreButton}
+                    size={40}
+                    onPress={() => navigation.navigate('Scoreboard')}
+                  />
+                  <StatusBar style="auto" />
+                </View>
+              </>
+          }
 
 
-        {
-          viewImage ?
-          null : 
-          (clickMarker ?
-            <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} imageAdded={imageAdded} setViewImage={setViewImage} markers={markers}/> : null)
-        }
-        {
-          viewImage ? null :
-          loggedIn ?
-          (clickMarker ?
-          <Pressable style={styles.appButtonContainer} onPress={deleteMarker}>
-            <Text style={styles.appButtonText}>Remove Marker</Text>
-          </Pressable> : null)
-          : null
-       
-        }
+          {
+            viewImage ?
+              null :
+              (clickMarker ?
+                <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} imageAdded={imageAdded} setViewImage={setViewImage} markers={markers} /> : null)
+          }
+          {
+            viewImage ? null :
+              loggedIn ?
+                (clickMarker ?
+                  <Pressable style={styles.appButtonContainer} onPress={deleteMarker}>
+                    <Text style={styles.appButtonText}>Remove Marker</Text>
+                  </Pressable> : null)
+                : null
+
+          }
 
         </View>
       );
