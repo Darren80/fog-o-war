@@ -191,41 +191,6 @@ const profile = ({ route, navigation }) => {
         </Surface>
         <Dialog.ScrollArea>
           <ScrollView>
-            <List.Item
-              title="User:"
-              //theme={theme}
-              //theme={styles.theme}
-              //theme={Primary40}
-              description={user.display_name}
-              left={(props) => <List.Icon icon="human-non-binary" />}
-            />
-            <List.Item
-              title="Profile's User Name:"
-              description={user.username}
-              left={(props) => <List.Icon icon="emoticon-poop" />}
-            />
-            <List.Item
-              title="History:"
-              description="45,646 meters"
-              left={(props) => <List.Icon icon="airballoon" />}
-            />
-            {/* <List.Accordion title="Customize fog">
-                    <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
-                    <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
-                    <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
-                    <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
-                    <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
-                    <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
-                </List.Accordion> */}
-            {/* <Button style={{marginTop: 30, right: '35%'}} onPress={() => setVisible(true)}>
-                    Delete History
-                </Button> */}
-            <List.Item
-              title="Log out"
-              style={styles.Buttons}
-              mode="contained"
-              onPress={(e) => handleLogOut(e)}
-            />
             <List.Accordion title="Customize fog">
               <List.Item
                 title="  Grey Cloud (Default)"
@@ -252,23 +217,49 @@ const profile = ({ route, navigation }) => {
                 onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}
               />
             </List.Accordion>
+            <List.Item
+              title="User:"
+              //theme={theme}
+              //theme={styles.theme}
+              //theme={Primary40}
+              description={user.display_name}
+              left={(props) => <List.Icon icon="human-non-binary" />}
+            />
+            <List.Item
+              title="Profile's User Name:"
+              description={user.username}
+              left={(props) => <List.Icon icon="emoticon-poop" />}
+            />
+            <List.Item
+              title="History:"
+              description="45,646 meters"
+              left={(props) => <List.Icon icon="airballoon" />}
+            />
+            {/* <List.Accordion title="Customize fog">
+                    <List.Item title="  Grey Cloud (Default)" onPress={() => mapSetter("rgba(218, 223, 225, 1)")}/>
+                    <List.Item title="  Sunshine and LollyPops" onPress={() => mapSetter("rgba(225, 223, 142, 0.97)")}/>
+                    <List.Item title="  Sea Foam" onPress={() => mapSetter("rgba(70, 204, 146, 0.88)")}/>
+                    <List.Item title="  Apocalypse " onPress={() => mapSetter("rgba(255, 110, 0, 0.88)")}/>
+                    <List.Item title="  People eater" onPress={() => mapSetter("rgba(107, 62, 202, 0.94)")}/>
+                    <List.Item title="  Unicorn MilkShake" onPress={() => mapSetter("rgba(239, 26, 203, 0.93)")}/>
+                </List.Accordion> */}
 
             <List.Item
               title="Share"
               left={(props) => <List.Icon icon="share-variant" />}
             />
-            <List.Item
+            {/*             <List.Item
               title="Invite Friends"
               left={(props) => <List.Icon icon="offer" />}
-            />
+            /> */}
             <List.Item
               title="Privacy"
               left={(props) => <List.Icon icon="alpha-p" />}
             />
-            <List.Item
+            {/*             <List.Item
               title="Preferences"
               left={(props) => <List.Icon icon="application-settings" />}
-            />
+            /> */}
             <List.Item
               title="About App"
               left={(props) => <List.Icon icon="information-variant" />}
@@ -280,6 +271,13 @@ const profile = ({ route, navigation }) => {
               ss={() => setVisible(true)}
             >
               Delete History
+            </Button>
+            <Button
+              style={styles.Buttons}
+              mode="contained"
+              onPress={(e) => handleLogOut(e)}
+            >
+              Log out{" "}
             </Button>
             <Portal>
               <Modal
