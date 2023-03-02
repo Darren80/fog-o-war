@@ -11,22 +11,22 @@ const signIn = ({ navigation }) => {
   const [loggingIn, setLoggingIn] = React.useState(false);
 
   const { user, setUser } = React.useContext(UserContext);
-  const {loggedIn, setLoggedIn} = React.useContext(LoggedInContext);
+  const { loggedIn, setLoggedIn } = React.useContext(LoggedInContext);
 
   const handleClick = (e) => {
     e.preventDefault();
-    setLoggingIn(true)
-    setLoggedIn(false)
-    let loggedInUser =
-    {
+    setLoggingIn(true);
+    setLoggedIn(false);
+    let loggedInUser = {
       username: username,
       password: password,
-    }
+    };
     userLogIn(loggedInUser)
-      .then(() => {
+      .then((response) => {
         setLoggingIn(false);
         setLoggedIn(true);
-        navigation.navigate("Profile")
+        setUser(response.data);
+        navigation.navigate("Profile");
       })
       .catch((err) => {
         console.log(err);
@@ -46,7 +46,7 @@ const signIn = ({ navigation }) => {
     getHome().then((response) => {
       if (response.loggedIn === true) {
         setUser(response);
-      } else if (response.loggedIn === false ) {
+      } else if (response.loggedIn === false) {
         setLoggedIn(false);
       }
     });

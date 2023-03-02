@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext} from "react";
+import { useEffect, useState, useContext } from "react";
 
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
@@ -6,7 +6,7 @@ import * as Location from "expo-location";
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
-import { IconButton, MD3Colors, Avatar, Button } from 'react-native-paper'
+import { IconButton, MD3Colors, Avatar, Button } from "react-native-paper";
 
 import ImageAdder from "./ImageAdder";
 
@@ -17,14 +17,12 @@ import { LocationAccuracy } from "expo-location";
 import { LoggedInContext, UserContext } from "./App";
 const api = new API();
 
-
 function home({ navigation }) {
   const { user, setUser } = useContext(UserContext);
-  const {loggedIn, setLoggedIn} = useContext(LoggedInContext)
+  const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
   const [username, setUsername] = useState(null);
-  const [userID, setUserID] = useState('test123');
+  const [userID, setUserID] = useState("test123");
   const turfWorker = new TurfWorker(userID);
-
 
   const [currentUserLocation, setCurrentUserLocation] = useState(null);
 
@@ -46,15 +44,15 @@ function home({ navigation }) {
     //TODO: Make a MODAL to explain to the user why background permission is required.
 
     //Request both background and foreground location permissions.
-    requestPermissions()
-      .catch((err) => {
-        setLocationErrorMessage(err);
-      })
+    requestPermissions().catch((err) => {
+      setLocationErrorMessage(err);
+    });
 
     // GET trips from DB.
-    api.getFogData(userID)
+    api
+      .getFogData(userID)
       .then((fogData) => {
-        const newFogPolygon = turfWorker.rebuildFogPolygonFromFogData(fogData)
+        const newFogPolygon = turfWorker.rebuildFogPolygonFromFogData(fogData);
         setFogPolygon(newFogPolygon);
       })
       .catch(() => {
@@ -63,32 +61,33 @@ function home({ navigation }) {
       })
       .finally(() => {
         //Will change current position when location changes while app is in the foreground.
-        Location.watchPositionAsync({
-          accuracy: Location.Accuracy.Highest,
-          distanceInterval: 20,
-        }, (newUserLocation) => {
-          setCurrentUserLocation(newUserLocation);
-        });
-      })
-
-  }, [])
+        Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Highest,
+            distanceInterval: 20,
+          },
+          (newUserLocation) => {
+            setCurrentUserLocation(newUserLocation);
+          }
+        );
+      });
+  }, []);
 
   //Runs every time the user's current location changes.
   useEffect(() => {
-    if (!currentUserLocation) { return }
+    if (!currentUserLocation) {
+      return;
+    }
 
     uncoverFog();
 
     // console.log(newPartialFogData, '<-- parital fog data to save to local storage, then send to db after x time');
 
-
-
     //TODO: Write fog data to local storage. ------------------------------------------
 
     //TODO: Write fog data to database after set amount of time e.g. every minute. ---------------------------------------------
     //TODO: Reset fog data in local storage after database 200 OK. ---------------------------------------------
-
-  }, [currentUserLocation])
+  }, [currentUserLocation]);
 
   const uncoverFog = (userHeightAboveGround) => {
     if (userHeightAboveGround) {
@@ -98,34 +97,42 @@ function home({ navigation }) {
     }
 
     //Check overlapping
-    
 
     //Uncover new area in fog
-    const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(currentUserLocation, fogPolygon, partialFogData);
+    const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(
+      currentUserLocation,
+      fogPolygon,
+      partialFogData
+    );
     const newFogPolygon2 = turfWorker.fixFog(newFogPolygon);
     setFogPolygon(newFogPolygon2);
     //Object to be saved in localstorage for later sending to db.
     setPartialFogData(newPartialFogData);
-  }
+  };
 
   const markerPositionSelected = (e) => {
     const markerPosition = e.nativeEvent.coordinate;
 
-    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, fogPolygon);
+    const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(
+      markerPosition,
+      fogPolygon
+    );
 
     if (checkUserWithinPolygon) {
       setPointsWithinPolygon(true);
-      setMarkers([...markers, {
-        coords: markerPosition
-      }]);
+      setMarkers([
+        ...markers,
+        {
+          coords: markerPosition,
+        },
+      ]);
     }
-  }
+  };
 
   const getCurrentElevation = () => {
-
     //Get current elevation according to GPS.
     Location.getCurrentPositionAsync({
-      accuracy: LocationAccuracy.BestForNavigation
+      accuracy: LocationAccuracy.BestForNavigation,
     })
       .then((newUserLocation) => {
         const currentLatitude = newUserLocation.coords.latitude;
@@ -133,7 +140,10 @@ function home({ navigation }) {
 
         setCurrentUserLocation(newUserLocation);
 
-        return Promise.all([api.getElevation(currentLatitude, currentLongitude), newUserLocation])
+        return Promise.all([
+          api.getElevation(currentLatitude, currentLongitude),
+          newUserLocation,
+        ]);
       })
       .then((data) => {
         const elevationResponse = data[0];
@@ -142,18 +152,45 @@ function home({ navigation }) {
         const currentAltitude = newUserLocation.coords.altitude;
         const currentAltitudeAccuracy = newUserLocation.coords.altitudeAccuracy;
 
-        const userHeightAboveGround = currentAltitude - elevationResponse.results[0].elevation;
+        const userHeightAboveGround =
+          currentAltitude - elevationResponse.results[0].elevation;
 
-        console.log('accuracy: ', currentAltitudeAccuracy, 'm');
-        console.log('user height above ground sea level: ', currentAltitude, 'm');
-        console.log('height of ground above sea level: ', elevationResponse.results[0].elevation, 'm');
-        console.log('user is ', userHeightAboveGround, 'm above ground level.');
+        console.log("accuracy: ", currentAltitudeAccuracy, "m");
+        console.log(
+          "user height above ground sea level: ",
+          currentAltitude,
+          "m"
+        );
+        console.log(
+          "height of ground above sea level: ",
+          elevationResponse.results[0].elevation,
+          "m"
+        );
+        console.log("user is ", userHeightAboveGround, "m above ground level.");
 
         if (userHeightAboveGround >= 0) {
           uncoverFog(userHeightAboveGround);
         }
-      })
+      });
+  };
 
+  const handleClick = (e) => {
+    e.preventDefault();
+    navigation.navigate("SignIn");
+  };
+
+  if (loggedIn === false) {
+    return (
+      <View>
+        <Button
+          style={styles.Buttons}
+          mode="contained"
+          onPress={(e) => handleClick(e)}
+        >
+          Please log in
+        </Button>
+      </View>
+    );
   }
 
   if (locationErrorMessage) {
@@ -167,7 +204,9 @@ function home({ navigation }) {
   if (!currentUserLocation) {
     return (
       <View style={styles.container}>
-        <Text style={styles.paragraph}>Loading location...{currentUserLocation}</Text>
+        <Text style={styles.paragraph}>
+          Loading location...{currentUserLocation}
+        </Text>
       </View>
     );
   }
@@ -209,61 +248,58 @@ function home({ navigation }) {
           }}
           onPress={(e) => markerPositionSelected(e)}
         >
+          {pointsWithingPolygon
+            ? markers.map((marker, i) => (
+                <Marker
+                  coordinate={marker.coords}
+                  key={i}
+                  onPress={() => {
+                    setClickMarker((current) => !current);
+                    setImageAdded((current) => !current);
+                  }}
+                >
+                  {imageAdded ? (
+                    <Image
+                      source={{ uri: marker.image }}
+                      style={{ width: 30, height: 30 }}
+                    />
+                  ) : null}
+                </Marker>
+              ))
+            : null}
 
-          {
-            pointsWithingPolygon ?
-              (
-                markers.map((marker, i) => (
-                  <Marker
-                    coordinate={marker.coords}
-                    key={i}
-                    onPress={() => {
-                      setClickMarker(current => !current);
-                      setImageAdded(current => !current);
-                    }}>
-                    {
-                      imageAdded ?
-                        <Image source={{ uri: marker.image }} style={{ width: 30, height: 30 }} />
-                        : null
-                    }
-                  </Marker>
-                ))
-              ) : null
-          }
-
-          {
-            fogPolygon ?
-              <Geojson
-                geojson={{
-                  features: [fogPolygon]
-                }}
-                fillColor='rgba(118,	119,	121	, 0.85)'
-                strokeColor="rgba(218, 223, 225, 1)"
-                strokeWidth={4}
-              >
-
-              </Geojson>
-              : null
-          }
+          {fogPolygon ? (
+            <Geojson
+              geojson={{
+                features: [fogPolygon],
+              }}
+              fillColor="rgba(118,	119,	121	, 0.85)"
+              strokeColor="rgba(218, 223, 225, 1)"
+              strokeWidth={4}
+            ></Geojson>
+          ) : null}
         </MapView>
 
         <ElevationButton />
 
         <View style={styles.navButton}>
           <IconButton
-            icon='account'
+            icon="account"
             iconColor={MD3Colors.error50}
             style={styles.navButton}
             size={40}
-            onPress={() => loggedIn === true ? navigation.navigate('Profile') : navigation.navigate('SignIn')}
+            onPress={() =>
+              loggedIn === true
+                ? navigation.navigate("Profile")
+                : navigation.navigate("SignIn")
+            }
           />
           <StatusBar style="auto" />
         </View>
 
-        {
-          clickMarker ?
-            <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} /> : null
-        }
+        {clickMarker ? (
+          <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} />
+        ) : null}
       </View>
     );
   }
@@ -281,33 +317,39 @@ const styles = StyleSheet.create({
     height: "90%",
   },
   button: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 4,
     elevation: 3,
-    backgroundColor: 'black',
+    backgroundColor: "black",
   },
   navButton: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-    top: '20%',
-    left: '75%',
-    alignSelf: 'flex-end',
-    paddingHorizontal: 0
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+    top: "20%",
+    left: "75%",
+    alignSelf: "flex-end",
+    paddingHorizontal: 0,
   },
   text: {
     fontSize: 16,
     lineHeight: 21,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     letterSpacing: 0.25,
-    color: 'white',
+    color: "white",
     width: "88%",
-    height: "88%"
-  }
-})
-
+    height: "88%",
+  },
+  Buttons: {
+    width: 200,
+    top: "40%",
+    margin: 5,
+    alignItems: "center",
+    left: "25%",
+  },
+});
 
 export default home;

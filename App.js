@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Provider as PaperProvider, MD3LightTheme } from "react-native-paper";
+import { getHome } from "./APIs";
 
 export const UserContext = React.createContext();
 export const LoggedInContext = React.createContext(false);
@@ -28,22 +29,48 @@ const theme = {
 const App = () => {
   const [user, setUser] = React.useState();
   const [loggedIn, setLoggedIn] = React.useState();
+
+  React.useEffect(() => {
+    console.log("checking log in");
+    getHome().then((response) => {
+      if (response.loggedIn === true) {
+        console.log("app logged in");
+        setUser(response);
+        setLoggedIn(true);
+      } else if (response.loggedIn === false) {
+        setLoggedIn(false);
+      }
+    });
+  }, []);
+
   return (
     <UserContext.Provider value={{ user, setUser }}>
-      <LoggedInContext.Provider value={{loggedIn, setLoggedIn}}>
-      <PaperProvider theme={theme}>
-        <NavigationContainer>
-          <Stack.Navigator>
-            <Stack.Screen name="Home" component={home} />
-            <Stack.Screen name="SignIn" component={signIn} />
-            <Stack.Screen
-              name="userRegistration"
-              component={userRegistration}
-            />
-            <Stack.Screen name="Profile" component={profile} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </PaperProvider>
+      <LoggedInContext.Provider value={{ loggedIn, setLoggedIn }}>
+        <PaperProvider theme={theme}>
+          <NavigationContainer>
+            <Stack.Navigator>
+              <Stack.Screen name="Home" component={home} />
+              <Stack.Screen
+                name="SignIn"
+                component={signIn}
+                options={{
+                  headerLeft: null,
+                }}
+              />
+              <Stack.Screen
+                name="userRegistration"
+                component={userRegistration}
+              />
+              <Stack.Screen
+                name="Profile"
+                component={profile}
+                options={{
+                  headerLeft: null,
+                }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </PaperProvider>
       </LoggedInContext.Provider>
     </UserContext.Provider>
   );

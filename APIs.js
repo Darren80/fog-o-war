@@ -34,6 +34,7 @@ export async function getTrips() {
 export async function userLogIn(userInfo) {
   return await api.post("/auth/login", userInfo).then((user) => {
     console.log(user.data, "logged in");
+    return user;
     getHome();
   });
 }
