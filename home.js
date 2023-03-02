@@ -1,13 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import splash from "./assets/splash.webp";
 
 import { StatusBar } from "expo-status-bar";
 import * as Location from "expo-location";
-import * as TaskManager from 'expo-task-manager';
 
-import { StyleSheet, Text, View, Image, Pressable, TouchableWithoutFeedback, ImageBackground, LogBox } from "react-native";
 import { PROVIDER_GOOGLE, Geojson, Marker } from "react-native-maps";
 import MapView from "react-native-maps";
 import { IconButton, MD3Colors, Avatar, Button, Card, Title, Paragraph, ProgressBar } from 'react-native-paper'
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ImageBackground,
+} from "react-native";
 
 import ImageAdder from "./ImageAdder";
 
@@ -20,29 +27,26 @@ import DisplayImages from "./DisplayImages";
 import { LocationAccuracy } from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { State } from "react-native-gesture-handler";
+import { LoggedInContext, UserContext } from "./App";
 
 //const loadingPicture = require('C:\Users\burna\Coding\fog-o-war\startingPic.jpg')
 const api = new API();
 
 function home({ navigation, route }) {
 
-  const [username, setUsername] = useState(null);
-  const [userID, setUserID] = useState('1');
-  const [userObject, setUserObject] = useState(null);
+  const { loggedIn, setLoggedIn } = useContext(LoggedInContext);
+  const { user, setUser } = useContext(UserContext);
 
-  const turfWorker = new TurfWorker(userID);
+  const [mapColour, setMapColour] = useState("rgba(218, 223, 225, 1)");
+  const [loading, setLoading] = useState(true);
 
-  const [mapColour, setMapColour] = useState("rgba(218, 223, 225, 1)")
-
-  const [loading, setLoading] = useState(true)
+  const turfWorker = new TurfWorker(user.user_id);
 
   const [currentUserLocation, setCurrentUserLocation] = useState(null);
 
   const [locationErrorMessage, setLocationErrorMessage] = useState(null);
 
   const [fogPolygon, setFogPolygon] = useState(null);
-
-  const [loggedIn, setLoggedIn] = useState(true);
 
 
   const [elevationButtonText, setElevationButtonText] = useState('Reveal fog based on elevation');
@@ -130,7 +134,9 @@ function home({ navigation, route }) {
 
   //Runs every time the user's current location changes.
   useEffect(() => {
-    if (!currentUserLocation) { return }
+    if (!currentUserLocation) {
+      return;
+    }
 
     let maxMph = maxSpeed;
     let maxMetersPerSecond = maxMph / 2.237;
@@ -160,7 +166,7 @@ function home({ navigation, route }) {
     if (!partialFogData || !savePartialFogData) { return }
     setSavePartialFogData(false)
 
-    console.log(partialFogData, '<-- parital fog data to save');
+    // console.log(partialFogData, '<-- parital fog data to save');
 
     api.postFogData(partialFogData)
       .then(() => {
@@ -178,6 +184,33 @@ function home({ navigation, route }) {
       .catch(e => { console.log(e) })
   }, [partialFogData])
 
+  //Below useEffect ------------------------------------------------------------------------------------
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    navigation.navigate("Sign In");
+  };
+
+  if (loggedIn === false) {
+    return (
+      <View>
+        <ImageBackground
+          source={splash}
+          resizeMode="cover"
+          style={{ minHeight: "100%" }}
+        >
+          <Button
+            style={styles.Buttons}
+            mode="contained"
+            onPress={(e) => handleClick(e)}
+          >
+            Please log in
+          </Button>
+        </ImageBackground>
+      </View>
+    );
+  }
+
   const uncoverFog = (userHeightAboveGround) => {
     if (userHeightAboveGround) {
       //expand the circle more when the user is higher up.
@@ -187,14 +220,17 @@ function home({ navigation, route }) {
 
     //Check overlapping
 
-
     //Uncover new area in fog
-    const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(currentUserLocation, fogPolygon, partialFogData);
+    const { newFogPolygon, newPartialFogData } = turfWorker.uncoverFog(
+      currentUserLocation,
+      fogPolygon,
+      partialFogData
+    );
     const newFogPolygon2 = turfWorker.fixFog(newFogPolygon);
     setFogPolygon(newFogPolygon2);
     //Object to be saved in localstorage for later sending to db.
     setPartialFogData(newPartialFogData);
-  }
+  };
 
   const markerPositionSelected = (e) => {
 
@@ -250,7 +286,7 @@ function home({ navigation, route }) {
       else if (markerLimit <= 3)
         alert('You have reached maximum number of markers!');
     }
-  }
+  };
 
   // if (locationErrorMessage) {
   //   return (
@@ -366,7 +402,7 @@ function home({ navigation, route }) {
         <Button onPress={getCurrentElevation} icon='access-point' mode="outlined" compact={true} disabled={elevationButtonDisabled}>
           {elevationButtonText}
         </Button>
-      </View>
+      </View >
     );
 
 
@@ -506,13 +542,13 @@ const styles = StyleSheet.create({
     height: "90%",
   },
   button: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 4,
     elevation: 3,
-    backgroundColor: 'black',
+    backgroundColor: "black",
   },
   navButton: {
     position: 'absolute',
@@ -540,9 +576,9 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     lineHeight: 21,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     letterSpacing: 0.25,
-    color: 'white',
+    color: "white",
     width: "88%",
     height: "88%"
   },
@@ -572,8 +608,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     alignSelf: "center",
     textTransform: "uppercase"
-  }
-})
-
+  },
+  Buttons: {
+    width: 200,
+    top: "80%",
+    margin: 5,
+    alignItems: "center",
+    left: "25%",
+  },
+});
 
 export default home;
