@@ -33,7 +33,7 @@ function home({ navigation }) {
 
   const [fogPolygon, setFogPolygon] = useState(null);
 
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
 
   //Markers
   const [markers, setMarkers] = useState([]);
@@ -106,47 +106,57 @@ function home({ navigation }) {
 
     const markerPosition = e.nativeEvent.coordinate;
 
-    const distance = turfWorker.distanceBetweenPoints(markerPosition, currentUserPosition);
+    let distance = 0;
+
+    markers.map((marker) => {
+      distance = turfWorker.distanceBetweenPoints(marker.coords, markerPosition);
+    })
 
     console.log(distance, '<-- distance');
 
     const checkUserWithinPolygon = turfWorker.checkUserPointsWithinPolygon(markerPosition, fogPolygon);
 
-    
       if (checkUserWithinPolygon) {
 
-        if(markerLimit < 3) {
-
+        if(markerLimit < 3 && distance < 0.5) {
+ 
           if(imageAdded === false) 
-          setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
-        
-          if(markerClicks === 1) {
+            setMarkerClicks((currmarkerClicks) => currmarkerClicks + 1);
+
+            if(markerClicks === 1) {
+              setPointsWithinPolygon(true);
+              setMarkers([...markers, {
+                coords: markerPosition
+              }]);
+                setMarkerLimit((currLimit) => currLimit + 1);
+            }
+
+            else if(markerClicks > 1) {
+                if(imageAdded || markerDeleteStatus) {
+                    setPointsWithinPolygon(true);
+                    setMarkers([...markers, {
+                      coords: markerPosition
+                      }]);
+                        setMarkerLimit((currLimit) => currLimit + 1);
+                    }
+                      setImageAdded(false);
+              } 
+            }
+          else if(distance > 0.5)
+          {
+            setImageAdded(false);
+            setMarkerLimit((currLimit) => currLimit = 0);
+            setMarkerClicks((currmarkerClicks) => currmarkerClicks = 2);
             setPointsWithinPolygon(true);
             setMarkers([...markers, {
               coords: markerPosition
             }]);
-              setMarkerLimit((currLimit) => currLimit + 1);
+              setMarkerLimit((currLimit) => currLimit + 1); 
           }
-        
-          else if(markerClicks > 1) {
-            if(imageAdded || markerDeleteStatus) {
-              setPointsWithinPolygon(true);
-              setMarkers([...markers, {
-                coords: markerPosition
-                }]);
-                  setMarkerLimit((currLimit) => currLimit + 1);
-              }
-              setImageAdded(false);
-            } 
-        }
-      else {
-            alert('You have reached maximum number of markers!');
-          }
-        
-          
-
-        }  
-  }
+          else if (markerLimit <= 3)
+          alert('You have reached maximum number of markers!');
+      }
+}
 
   // if (locationErrorMessage) {
   //   return (
@@ -183,18 +193,19 @@ function home({ navigation }) {
       return marker.coords !== removeMarker; 
     })
     setMarkers(filteredMarkers);
+    setClickMarker(false);
   }
 
-  //TODO: Put button at bottom of map.
-  // const ElevationButton = () => (
-  //   <View style={styles.container}>
-  //     <Button onPress={requestPermissions} compact={true}>
-  //       Reveal fog based on elevation
-  //     </Button>
-  //   </View>
-  // );
-    // console.log(imageAdded, '<-- imageAdded');
-    // console.log(clickMarker, '<-- clickMarker');
+  // TODO: Put button at bottom of map.
+  const ElevationButton = () => (
+    <View style={styles.container}>
+      <Button onPress={requestPermissions} compact={true}>
+        Reveal fog based on elevation
+      </Button>
+    </View>
+  );
+    console.log(imageAdded, '<-- imageAdded');
+    console.log(clickMarker, '<-- clickMarker');
 
   if (currentUserPosition) {
     return (
@@ -262,9 +273,14 @@ function home({ navigation }) {
           }
         </MapView>
   }
-        {/* <ElevationButton/> */}
-
-        <View style={styles.navButton}>
+            {
+          clickMarker ? null :
+          <ElevationButton />
+        }
+        {
+          viewImage ? null :
+          <>
+                  <View style={styles.navButton}>
           <IconButton
             icon='account'
             iconColor={MD3Colors.error50}
@@ -274,6 +290,9 @@ function home({ navigation }) {
           />
           <StatusBar style="auto" />
         </View>
+          </>
+        }
+
 
         {
           viewImage ?
@@ -282,10 +301,11 @@ function home({ navigation }) {
             <ImageAdder setMarkers={setMarkers} setImageAdded={setImageAdded} imageAdded={imageAdded} setViewImage={setViewImage} markers={markers}/> : null)
         }
         {
+          viewImage ? null :
           loggedIn ?
           (clickMarker ?
-          <Pressable style={styles.deleteButton} onPress={deleteMarker}>
-            <Text style={styles.text}>Remove Marker</Text>
+          <Pressable style={styles.appButtonContainer} onPress={deleteMarker}>
+            <Text style={styles.appButtonText}>Remove Marker</Text>
           </Pressable> : null)
           : null
        
@@ -342,6 +362,24 @@ const styles = StyleSheet.create({
     color: 'white',
     // width: "88%",
     // height: "88%"
+  },
+  appButtonContainer: {
+    elevation: 5,
+    backgroundColor: "#009688",
+    borderRadius: 10,
+    paddingVertical: 7.5,
+    paddingHorizontal: 7.5,
+    marginHorizontal: 4,
+    marginBottom: 4,
+    marginTop: 4,
+    width: '40%'
+  },
+  appButtonText: {
+    fontSize: 10,
+    color: "#fff",
+    fontWeight: "bold",
+    alignSelf: "center",
+    textTransform: "uppercase"
   }
 })
 

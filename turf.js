@@ -66,17 +66,17 @@ export class TurfWorker {
 
   }
 
-  distanceBetweenPoints(markerPoint, userCurrentLocation) {
+  distanceBetweenPoints(markerPoint, previousMarkerLocation) {
     
     const pointPosition = turf.point([markerPoint.longitude, markerPoint.latitude]);
 
     const from = pointPosition.geometry.coordinates;
 
-    const userPosition = turf.point([userCurrentLocation.coords.longitude, userCurrentLocation.coords.latitude]);
+    const lastPosition = turf.point([previousMarkerLocation.longitude, previousMarkerLocation.latitude]);
 
-    const  to = userPosition.geometry.coordinates;
+    const  to = lastPosition.geometry.coordinates;
 
-    const options = {units: 'miles'};
+    const options = {units: 'kilometers'};
 
     const distance = turf.distance(from, to, options);
 
