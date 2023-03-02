@@ -554,7 +554,9 @@ function home({ navigation, route }) {
                   size={40}
                   onPress={() =>
                     loggedIn
-                      ? navigation.navigate("Profile")
+                      ? navigation.navigate("Profile", {
+                          mapSetter: setMapColour,
+                        })
                       : navigation.navigate("SignIn")
                   }
                 />
